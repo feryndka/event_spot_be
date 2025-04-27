@@ -36,7 +36,7 @@ Event Spot Backend is a comprehensive Laravel RESTful API for event management a
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/naufalgholib/event_spot_be.git
+    git clone https://github.com/feryndka/event_spot_be
     cd event_spot_be
     ```
 
