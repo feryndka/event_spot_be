@@ -74,8 +74,14 @@ Event Spot Backend is a comprehensive Laravel RESTful API for event management a
     ```bash
     php artisan migrate
     ```
+    
+7. Run seeder for dummy data:
 
-7. Start the development server:
+    ```bash
+    php artisan db:seed
+    ```
+    
+8. Start the development server:
     ```bash
     php artisan serve
     ```
