@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
             EventAttendeeSeeder::class,
             PaymentSeeder::class,
             CommentSeeder::class,
-            BookmarkSeeder::class,
             FollowerSeeder::class,
             CategorySubscriptionSeeder::class,
         ]);

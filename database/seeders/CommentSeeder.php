@@ -11,31 +11,44 @@ class CommentSeeder extends Seeder
 {
   public function run(): void
   {
+    // Get regular users
     $users = User::where('user_type', 'user')->get();
+
+    // Get all events
     $events = Event::all();
 
     $comments = [
-      'Great event! Looking forward to it.',
-      'The lineup looks amazing!',
-      'Can\'t wait to attend this event.',
-      'This is going to be epic!',
-      'Perfect timing for this event.',
-      'The venue is perfect for this kind of event.',
-      'Hope to see more events like this!',
-      'The price is very reasonable.',
-      'Will there be food vendors?',
-      'Is there parking available?',
+      "Looking forward to this event!",
+      "Great lineup of speakers!",
+      "Can't wait to attend!",
+      "This is going to be amazing!",
+      "Perfect venue choice!",
+      "The schedule looks well organized.",
+      "Hope to meet new people there!",
+      "The price is reasonable for what's offered.",
+      "Will there be food available?",
+      "Is parking included in the ticket price?"
     ];
 
     foreach ($events as $event) {
-      // Create 3-5 random comments for each event
-      $numComments = rand(3, 5);
-      for ($i = 0; $i < $numComments; $i++) {
+      // Get number of available users
+      $availableUsers = $users->count();
+
+      // Determine how many comments to add (1 or 2, depending on available users)
+      $numComments = min(rand(1, 2), $availableUsers);
+
+      // Add random comments
+      $randomUsers = $users->random($numComments);
+      $randomComments = collect($comments)->random($numComments);
+
+      foreach ($randomUsers as $index => $user) {
         Comment::create([
           'event_id' => $event->id,
-          'user_id' => $users->random()->id,
-          'content' => $comments[array_rand($comments)],
-          'created_at' => now()->subDays(rand(1, 30)),
+          'user_id' => $user->id,
+          'content' => $randomComments[$index],
+          'is_approved' => true,
+          'parent_id' => null,
+          'created_at' => now()->subDays(rand(1, 10))
         ]);
       }
     }

@@ -12,24 +12,32 @@ class PaymentSeeder extends Seeder
 {
   public function run(): void
   {
+    // Get all event attendees
     $attendees = EventAttendee::all();
 
-    $paymentMethods = ['bank_transfer', 'credit_card', 'e_wallet'];
-    $statuses = ['pending', 'completed', 'failed', 'refunded'];
-
     foreach ($attendees as $attendee) {
+      $event = Event::find($attendee->event_id);
+
       Payment::create([
         'attendee_id' => $attendee->id,
-        'amount' => $attendee->event->price,
-        'payment_method' => $paymentMethods[array_rand($paymentMethods)],
-        'status' => $statuses[array_rand($statuses)],
-        'transaction_id' => 'TRX-' . strtoupper(substr(md5(rand()), 0, 12)),
+        'amount' => $event->price,
+        'payment_method' => 'credit_card',
+        'transaction_id' => 'TRX-' . strtoupper(uniqid()),
+        'status' => 'completed',
         'payment_date' => now(),
+        'midtrans_snap_token' => null,
+        'midtrans_order_id' => null,
         'payment_details' => json_encode([
-          'bank_name' => 'Bank Central Asia',
-          'account_number' => '1234567890',
-          'account_name' => 'Event Spot',
-        ]),
+          'card_type' => 'Visa',
+          'last_four' => '4242',
+          'billing_address' => [
+            'street' => '123 Main St',
+            'city' => 'New York',
+            'state' => 'NY',
+            'zip' => '10001',
+            'country' => 'USA'
+          ]
+        ])
       ]);
     }
   }

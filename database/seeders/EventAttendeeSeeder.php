@@ -11,17 +11,31 @@ class EventAttendeeSeeder extends Seeder
 {
   public function run(): void
   {
+    // Get regular users
     $users = User::where('user_type', 'user')->get();
+
+    // Get all events
     $events = Event::all();
 
-    // Create some attendees for each event
+    // Create attendees for each event
     foreach ($events as $event) {
-      foreach ($users as $user) {
+      // Get number of available users
+      $availableUsers = $users->count();
+
+      // Determine how many users to add (1 or 2, depending on available users)
+      $numUsers = min(rand(1, 2), $availableUsers);
+
+      // Add random users as attendees
+      $randomUsers = $users->random($numUsers);
+
+      foreach ($randomUsers as $user) {
         EventAttendee::create([
           'event_id' => $event->id,
           'user_id' => $user->id,
           'status' => 'registered',
-          'ticket_code' => 'TICKET-' . strtoupper(substr(md5(rand()), 0, 8)),
+          'registration_date' => now(),
+          'ticket_code' => 'TIX-' . strtoupper(uniqid()),
+          'check_in_time' => null
         ]);
       }
     }

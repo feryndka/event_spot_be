@@ -6,24 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Follower extends Model
+class EventImage extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
 
     protected $fillable = [
-        'user_id',
-        'promotor_id',
+        'event_id',
+        'image_path',
+        'is_primary',
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+    protected $casts = [
+        'is_primary' => 'boolean'
+    ];
 
-    public function promotor(): BelongsTo
+    public function event(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'promotor_id');
+        return $this->belongsTo(Event::class);
     }
 }

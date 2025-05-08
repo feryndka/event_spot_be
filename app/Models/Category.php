@@ -8,22 +8,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
-  use HasFactory;
+    use HasFactory;
 
-  protected $fillable = [
-    'name',
-    'slug',
-    'description',
-    'icon',
-  ];
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'icon',
+    ];
 
-  public function events(): HasMany
-  {
-    return $this->hasMany(Event::class);
-  }
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
 
-  public function subscriptions(): HasMany
-  {
-    return $this->hasMany(CategorySubscription::class);
-  }
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(CategorySubscription::class);
+    }
 }

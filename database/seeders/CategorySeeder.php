@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class CategorySeeder extends Seeder
 {
@@ -13,40 +12,52 @@ class CategorySeeder extends Seeder
     $categories = [
       [
         'name' => 'Music',
-        'description' => 'Concerts, music festivals, and live performances',
-        'icon' => 'music',
         'slug' => 'music',
-      ],
-      [
-        'name' => 'Sports',
-        'description' => 'Sports events, tournaments, and competitions',
-        'icon' => 'sports',
-        'slug' => 'sports',
-      ],
-      [
-        'name' => 'Arts & Culture',
-        'description' => 'Art exhibitions, cultural festivals, and theater shows',
-        'icon' => 'art',
-        'slug' => 'arts-culture',
-      ],
-      [
-        'name' => 'Food & Drink',
-        'description' => 'Food festivals, wine tastings, and culinary events',
-        'icon' => 'food',
-        'slug' => 'food-drink',
+        'description' => 'Music concerts and festivals',
+        'icon' => 'music-note'
       ],
       [
         'name' => 'Business',
-        'description' => 'Conferences, seminars, and networking events',
-        'icon' => 'business',
         'slug' => 'business',
+        'description' => 'Business conferences and networking',
+        'icon' => 'briefcase'
       ],
       [
         'name' => 'Technology',
-        'description' => 'Tech conferences, hackathons, and workshops',
-        'icon' => 'tech',
         'slug' => 'technology',
+        'description' => 'Tech meetups and conferences',
+        'icon' => 'laptop'
       ],
+      [
+        'name' => 'Art',
+        'slug' => 'art',
+        'description' => 'Art exhibitions and workshops',
+        'icon' => 'palette'
+      ],
+      [
+        'name' => 'Sports',
+        'slug' => 'sports',
+        'description' => 'Sports events and tournaments',
+        'icon' => 'football'
+      ],
+      [
+        'name' => 'Food',
+        'slug' => 'food',
+        'description' => 'Food festivals and culinary events',
+        'icon' => 'utensils'
+      ],
+      [
+        'name' => 'Education',
+        'slug' => 'education',
+        'description' => 'Educational workshops and seminars',
+        'icon' => 'graduation-cap'
+      ],
+      [
+        'name' => 'Health',
+        'slug' => 'health',
+        'description' => 'Health and wellness events',
+        'icon' => 'heart-pulse'
+      ]
     ];
 
     foreach ($categories as $category) {

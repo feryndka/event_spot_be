@@ -10,127 +10,142 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
-  use HasFactory;
+    use HasFactory;
 
-  protected $fillable = [
-    'title',
-    'slug',
-    'description',
-    'is_ai_generated',
-    'poster_image',
-    'promotor_id',
-    'category_id',
-    'location_name',
-    'address',
-    'latitude',
-    'longitude',
-    'start_date',
-    'end_date',
-    'registration_start',
-    'registration_end',
-    'is_free',
-    'price',
-    'max_attendees',
-    'is_published',
-    'is_featured',
-    'is_approved',
-    'views_count',
-  ];
+    protected $fillable = [
+        'title',
+        'slug',
+        'description',
+        'is_ai_generated',
+        'poster_image',
+        'promotor_id',
+        'category_id',
+        'location_name',
+        'address',
+        'latitude',
+        'longitude',
+        'start_date',
+        'end_date',
+        'registration_start',
+        'registration_end',
+        'is_free',
+        'price',
+        'max_attendees',
+        'is_published',
+        'is_featured',
+        'is_approved',
+        'views_count',
+    ];
 
-  protected $casts = [
-    'is_ai_generated' => 'boolean',
-    'is_free' => 'boolean',
-    'is_published' => 'boolean',
-    'is_featured' => 'boolean',
-    'is_approved' => 'boolean',
-    'start_date' => 'datetime',
-    'end_date' => 'datetime',
-    'registration_start' => 'datetime',
-    'registration_end' => 'datetime',
-    'price' => 'decimal:2',
-    'latitude' => 'decimal:8',
-    'longitude' => 'decimal:8',
-  ];
+    protected $casts = [
+        'is_ai_generated' => 'boolean',
+        'is_free' => 'boolean',
+        'is_published' => 'boolean',
+        'is_featured' => 'boolean',
+        'is_approved' => 'boolean',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'registration_start' => 'datetime',
+        'registration_end' => 'datetime',
+        'price' => 'decimal:2',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
+    ];
 
-  public function promotor(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'promotor_id');
-  }
+    public function promotor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'promotor_id');
+    }
 
-  public function category(): BelongsTo
-  {
-    return $this->belongsTo(Category::class);
-  }
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
 
-  public function attendees(): HasMany
-  {
-    return $this->hasMany(EventAttendee::class);
-  }
+    public function attendees(): HasMany
+    {
+        return $this->hasMany(EventAttendee::class);
+    }
 
-  public function comments(): HasMany
-  {
-    return $this->hasMany(Comment::class);
-  }
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
 
-  public function bookmarks(): HasMany
-  {
-    return $this->hasMany(Bookmark::class);
-  }
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
 
-  public function statistics(): HasMany
-  {
-    return $this->hasMany(Statistic::class);
-  }
+    public function images(): HasMany
+    {
+        return $this->hasMany(EventImage::class);
+    }
 
-  public function tags(): BelongsToMany
-  {
-    return $this->belongsToMany(EventTag::class, 'event_tag_relations', 'event_id', 'tag_id');
-  }
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(EventTag::class, 'event_tag_relations', 'event_id', 'tag_id');
+    }
 
-  public function images(): HasMany
-  {
-    return $this->hasMany(EventImage::class);
-  }
+    public function statistics(): HasMany
+    {
+        return $this->hasMany(Statistic::class);
+    }
 
-  // Scopes
-  public function scopePublished($query)
-  {
-    return $query->where('is_published', true);
-  }
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(EventRating::class);
+    }
 
-  public function scopeFeatured($query)
-  {
-    return $query->where('is_featured', true);
-  }
+    public function averageRating()
+    {
+        return $this->ratings()->approved()->avg('rating');
+    }
 
-  public function scopeApproved($query)
-  {
-    return $query->where('is_approved', true);
-  }
+    public function totalRatings()
+    {
+        return $this->ratings()->approved()->count();
+    }
 
-  public function scopeFree($query)
-  {
-    return $query->where('is_free', true);
-  }
+    // Scopes
+    public function scopePublished($query)
+    {
+        return $query->where('is_published', true);
+    }
 
-  public function scopePaid($query)
-  {
-    return $query->where('is_free', false);
-  }
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
 
-  public function scopeUpcoming($query)
-  {
-    return $query->where('start_date', '>', now());
-  }
+    public function scopeApproved($query)
+    {
+        return $query->where('is_approved', true);
+    }
 
-  public function scopeOngoing($query)
-  {
-    return $query->where('start_date', '<=', now())
-      ->where('end_date', '>=', now());
-  }
+    public function scopeFree($query)
+    {
+        return $query->where('is_free', true);
+    }
 
-  public function scopePast($query)
-  {
-    return $query->where('end_date', '<', now());
-  }
+    public function scopePaid($query)
+    {
+        return $query->where('is_free', false);
+    }
+
+    public function scopeUpcoming($query)
+    {
+        return $query->where('start_date', '>', now());
+    }
+
+    public function scopeOngoing($query)
+    {
+        return $query->where('start_date', '<=', now())
+            ->where('end_date', '>=', now());
+    }
+
+    public function scopePast($query)
+    {
+        return $query->where('end_date', '<', now());
+    }
 }

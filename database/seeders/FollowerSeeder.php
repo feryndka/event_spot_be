@@ -10,18 +10,20 @@ class FollowerSeeder extends Seeder
 {
   public function run(): void
   {
+    // Get regular users
+    $regularUsers = User::where('user_type', 'user')->get();
+
+    // Get promotor users
     $promotors = User::where('user_type', 'promotor')->get();
-    $users = User::where('user_type', 'user')->get();
 
-    foreach ($promotors as $promotor) {
-      // Each promotor gets 1-2 random followers
-      $numFollowers = rand(1, 2);
-      $randomUsers = $users->random($numFollowers);
+    foreach ($regularUsers as $user) {
+      // Each user follows 1 random promotor
+      if ($promotors->count() > 0) {
+        $promotor = $promotors->random();
 
-      foreach ($randomUsers as $user) {
         Follower::create([
           'user_id' => $user->id,
-          'promotor_id' => $promotor->id,
+          'promotor_id' => $promotor->id
         ]);
       }
     }

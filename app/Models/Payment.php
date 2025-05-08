@@ -8,49 +8,49 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
-  use HasFactory;
+    use HasFactory;
 
-  protected $fillable = [
-    'attendee_id',
-    'amount',
-    'payment_method',
-    'transaction_id',
-    'status',
-    'payment_date',
-    'midtrans_snap_token',
-    'midtrans_order_id',
-    'payment_details',
-  ];
+    protected $fillable = [
+        'attendee_id',
+        'amount',
+        'payment_method',
+        'transaction_id',
+        'status',
+        'payment_date',
+        'midtrans_snap_token',
+        'midtrans_order_id',
+        'payment_details',
+    ];
 
-  protected $casts = [
-    'amount' => 'decimal:2',
-    'payment_date' => 'datetime',
-    'payment_details' => 'array',
-  ];
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'payment_date' => 'datetime',
+        'payment_details' => 'array',
+    ];
 
-  public function attendee(): BelongsTo
-  {
-    return $this->belongsTo(EventAttendee::class);
-  }
+    public function attendee(): BelongsTo
+    {
+        return $this->belongsTo(EventAttendee::class);
+    }
 
-  // Scopes
-  public function scopePending($query)
-  {
-    return $query->where('status', 'pending');
-  }
+    // Scopes
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
 
-  public function scopeCompleted($query)
-  {
-    return $query->where('status', 'completed');
-  }
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
 
-  public function scopeFailed($query)
-  {
-    return $query->where('status', 'failed');
-  }
+    public function scopeFailed($query)
+    {
+        return $query->where('status', 'failed');
+    }
 
-  public function scopeRefunded($query)
-  {
-    return $query->where('status', 'refunded');
-  }
+    public function scopeRefunded($query)
+    {
+        return $query->where('status', 'refunded');
+    }
 }
