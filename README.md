@@ -82,8 +82,15 @@ Event Spot Backend is a comprehensive Laravel RESTful API for event management a
     ```
     
 8. Start the development server:
-    ```bash
+
+   ```bash
     php artisan serve
+    ```
+    
+9. Access Documentation APIs End Point
+
+    ```bash
+    http://127.0.0.1:8000/docs/api
     ```
 
 ## 📚 API Documentation
