@@ -9,6 +9,7 @@ use App\Models\EventAttendee;
 use App\Models\EventImage;
 use App\Models\EventTag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -276,5 +277,33 @@ class EventController extends Controller
     ]);
 
     return response()->json($attendee);
+  }
+
+  public function generateDescription(Request $request)
+  {
+    $request->validate([
+      'title' => 'required|string|max:255',
+    ]);
+
+    $title = $request->input('title');
+
+    $prompt = "Buat deskripsi event yang menarik dan informatif berdasarkan judul berikut:\n\nJudul: \"$title\"\n\nDeskripsi:";
+
+    $response = Http::withToken(env('OPENAI_API_KEY'))
+      ->post('https://api.openai.com/v1/chat/completions', [
+        'model' => 'gpt-3.5-turbo', // Can be changed to gpt-4 or other models
+        'messages' => [
+          ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.7,
+        'max_tokens' => 150,
+      ]);
+
+    $description = $response->json('choices.0.message.content');
+
+    return response()->json([
+      'title' => $title,
+      'description' => trim($description),
+    ]);
   }
 }

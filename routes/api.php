@@ -124,6 +124,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/events/{event}/images/{image}', [PromotorEventController::class, 'deleteImage']);
         Route::put('/events/{event}/publish', [PromotorEventController::class, 'publish']);
         Route::put('/events/{event}/unpublish', [PromotorEventController::class, 'unpublish']);
+        Route::post('/events/{event}/generate-description', [PromotorEventController::class, 'generateDescription']); // AI Generate Description
 
         // Attendee Management
         Route::prefix('events/{event}/attendees')->group(function () {
