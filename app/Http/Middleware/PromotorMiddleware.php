@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminMiddleware
+class PromotorMiddleware
 {
   /**
    * Handle an incoming request.
@@ -17,10 +17,10 @@ class AdminMiddleware
    */
   public function handle(Request $request, Closure $next): Response
   {
-    if (!$request->user() || $request->user()->user_type !== 'admin') {
+    if (!$request->user() || $request->user()->user_type !== 'promotor') {
       return response()->json([
         'status' => 'error',
-        'message' => 'Unauthorized. Admin access required.'
+        'message' => 'Unauthorized. Promotor access required.'
       ], 403);
     }
 

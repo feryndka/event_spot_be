@@ -4,26 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EventImage extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    public $timestamps = false;
+  protected $fillable = [
+    'event_id',
+    'image_path',
+    'image_type',
+    'is_primary',
+    'order',
+  ];
 
-    protected $fillable = [
-        'event_id',
-        'image_path',
-        'is_primary',
-    ];
+  protected $casts = [
+    'is_primary' => 'boolean',
+    'order' => 'integer',
+  ];
 
-    protected $casts = [
-        'is_primary' => 'boolean'
-    ];
-
-    public function event(): BelongsTo
-    {
-        return $this->belongsTo(Event::class);
-    }
+  /**
+   * Get the event that owns the image.
+   */
+  public function event()
+  {
+    return $this->belongsTo(Event::class);
+  }
 }

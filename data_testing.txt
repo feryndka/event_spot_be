@@ -1,0 +1,115 @@
+====== ENDPOINT API =============
+Flow Backend: Route API -> Migration -> Model -> Controller -> Resource
+--------------------------------------------------------------------------
+TESTING /REGISTRASI
+URL: http://127.0.0.1:8000/api/auth/register [POST]
+{
+    "name": "Admin Event Spot",
+    "email": "admin@eventspot.com",
+    "password": "admin123",
+    "password_confirmation": "admin123",
+    "phone_number": "081234567890",
+    "user_type": "admin"
+}
+{
+    "name": "Promotor Event",
+    "email": "promotor@eventspot.com",
+    "password": "promotor123",
+    "password_confirmation": "promotor123",
+    "phone_number": "089876543210",
+    "user_type": "promotor"
+}
+{
+    "name": "User Event",
+    "email": "user@eventspot.com",
+    "password": "password123",
+    "password_confirmation": "password123",
+    "phone_number": "087812345678",
+    "user_type": "user"
+}
+{
+    "name": "John Doe",
+    "email": "john@eventspot.com",
+    "password": "userjohn123",
+    "password_confirmation": "userjohn123",
+    "phone_number": "0824091808",
+    "user_type": "user"
+}
+
+--------------------------------------------------------------------------
+TESTING /LOGIN
+URL: http://127.0.0.1:8000/api/auth/login [POST]
+{
+    "email": "admin@eventspot.com",
+    "password": "admin123"
+}
+{
+    "email": "promotor@eventspot.com",
+    "password": "promotor123"
+}
+{
+    "email": "user@eventspot.com",
+    "password": "password123"
+}
+
+--------------------------------------------------------------------------
+TESTING CATEGORY ADMIN
+URL: http://127.0.0.1:8000/api/admin/categories [POST]
+{
+    "name": "Music",
+    "description": "Music concerts and festivals",
+    "icon": "music-note"
+}
+{
+    "name": "Business",
+    "description": "Business conferences and networking",
+    "icon": "briefcase"
+}
+
+--------------------------------------------------------------------------
+TESTING EVENT TAG ADMIN
+URL: http://127.0.0.1:8000/api/admin/event-tags [POST]
+{
+    "name": "Technology"
+}
+{
+    "name": "Festival"
+}
+
+--------------------------------------------------------------------------
+TESTING EVENT PROMOTOR
+URL: http://127.0.0.1:8000/api/promotor/events [POST]
+{
+    "title": "Tech Conference 2024",
+    "description": "Annual technology conference featuring the latest innovations",
+    "category_id": 1,
+    "location_name": "Jakarta Convention Center",
+    "address": "Jl. Gatot Subroto, Jakarta Selatan",
+    "latitude": -6.2088,
+    "longitude": 106.8456,
+    "start_date": "2024-06-15 09:00:00",
+    "end_date": "2024-06-16 17:00:00",
+    "registration_start": "2024-05-01 00:00:00",
+    "registration_end": "2024-06-10 23:59:59",
+    "is_free": false,
+    "price": 500000,
+    "max_attendees": 100,
+    "tags": [1, 3]
+}
+{
+    "title": "Startup Networking Night",
+    "description": "Networking event for startup founders and investors",
+    "category_id": 3,
+    "location_name": "Co-working Space Jakarta",
+    "address": "Jl. Sudirman Kav. 52-53, Jakarta Pusat",
+    "latitude": -6.2088,
+    "longitude": 106.8456,
+    "start_date": "2024-07-20 18:00:00",
+    "end_date": "2024-07-20 22:00:00",
+    "registration_start": "2024-06-01 00:00:00",
+    "registration_end": "2024-07-15 23:59:59",
+    "is_free": true,
+    "price": 0,
+    "max_attendees": 50,
+    "tags": [1]
+}

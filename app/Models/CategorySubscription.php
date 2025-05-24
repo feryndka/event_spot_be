@@ -4,27 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 
 class CategorySubscription extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    public $timestamps = false;
+  protected $fillable = [
+    'user_id',
+    'category_id',
+  ];
 
-    protected $fillable = [
-        'user_id',
-        'category_id',
-    ];
+  /**
+   * Get the user that owns the subscription.
+   */
+  public function user()
+  {
+    return $this->belongsTo(User::class);
+  }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
-    }
+  /**
+   * Get the category that is subscribed to.
+   */
+  public function category()
+  {
+    return $this->belongsTo(Category::class);
+  }
 }

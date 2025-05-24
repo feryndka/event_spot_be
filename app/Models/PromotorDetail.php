@@ -7,31 +7,37 @@ use Illuminate\Database\Eloquent\Model;
 
 class PromotorDetail extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'company_name',
-        'company_logo',
-        'description',
-        'website',
-        'social_media',
-        'verification_status',
-        'verification_document',
-    ];
+  protected $fillable = [
+    'user_id',
+    'company_name',
+    'company_address',
+    'phone_number',
+    'website',
+    'description',
+    'verification_status',
+    'verification_document',
+    'verification_notes',
+  ];
 
-    protected $casts = [
-        'social_media' => 'array',
-        'verification_status' => 'string',
-    ];
+  protected $casts = [
+    'verification_status' => 'string',
+  ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+  /**
+   * Get the user that owns the promotor details.
+   */
+  public function user()
+  {
+    return $this->belongsTo(User::class);
+  }
 
-    public function events()
-    {
-        return $this->hasManyThrough(Event::class, User::class, 'id', 'promotor_id');
-    }
+  /**
+   * Get the events for the promotor.
+   */
+  public function events()
+  {
+    return $this->hasMany(Event::class, 'promotor_id', 'user_id');
+  }
 }

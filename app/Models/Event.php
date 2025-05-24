@@ -72,9 +72,10 @@ class Event extends Model
         return $this->hasMany(Comment::class);
     }
 
-    public function bookmarks(): HasMany
+    public function bookmarks(): BelongsToMany
     {
-        return $this->hasMany(Bookmark::class);
+        return $this->belongsToMany(User::class, 'bookmarks')
+            ->withTimestamps();
     }
 
     public function images(): HasMany
@@ -92,25 +93,11 @@ class Event extends Model
         return $this->hasMany(Statistic::class);
     }
 
-    public function ratings(): HasMany
-    {
-        return $this->hasMany(EventRating::class);
-    }
-
-    public function averageRating()
-    {
-        return $this->ratings()->approved()->avg('rating');
-    }
-
-    public function totalRatings()
-    {
-        return $this->ratings()->approved()->count();
-    }
-
     // Scopes
     public function scopePublished($query)
     {
-        return $query->where('is_published', true);
+        return $query->where('is_published', true)
+            ->where('is_approved', true);
     }
 
     public function scopeFeatured($query)
@@ -147,5 +134,19 @@ class Event extends Model
     public function scopePast($query)
     {
         return $query->where('end_date', '<', now());
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+                ->orWhere('location_name', 'like', "%{$search}%");
+        });
+    }
+
+    public function scopeByCategory($query, $categoryId)
+    {
+        return $query->where('category_id', $categoryId);
     }
 }

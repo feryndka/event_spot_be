@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class User extends Model
+class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
@@ -55,54 +57,79 @@ class User extends Model
     }
 
     // Relationships
-    public function promotorDetails()
+    public function events(): HasMany
     {
-        return $this->hasOne(PromotorDetail::class);
+        return $this->hasMany(Event::class);
     }
 
-    public function events()
-    {
-        return $this->hasMany(Event::class, 'promotor_id');
-    }
-
-    public function eventAttendees()
-    {
-        return $this->hasMany(EventAttendee::class);
-    }
-
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
-    public function bookmarks()
+    public function eventAttendees(): HasMany
     {
-        return $this->hasMany(Bookmark::class);
+        return $this->hasMany(EventAttendee::class);
     }
 
-    public function followers()
+    public function bookmarks(): BelongsToMany
     {
-        return $this->hasMany(Follower::class, 'promotor_id');
+        return $this->belongsToMany(Event::class, 'bookmarks')
+            ->withTimestamps();
     }
 
-    public function following()
+    public function favoriteEvents(): BelongsToMany
     {
-        return $this->hasMany(Follower::class, 'user_id');
+        return $this->belongsToMany(Event::class, 'event_favorites')
+            ->withTimestamps();
     }
 
-    public function categorySubscriptions()
+    public function followingPromotors(): BelongsToMany
     {
-        return $this->hasMany(CategorySubscription::class);
+        return $this->belongsToMany(User::class, 'promotor_follows', 'follower_id', 'promotor_id')
+            ->withTimestamps();
     }
 
-    public function notifications()
+    public function followers(): BelongsToMany
     {
-        return $this->hasMany(Notification::class);
+        return $this->belongsToMany(User::class, 'promotor_follows', 'promotor_id', 'follower_id')
+            ->withTimestamps();
     }
 
-    public function preferences()
+    public function subscribedCategories(): BelongsToMany
     {
-        return $this->hasOne(UserPreference::class);
+        return $this->belongsToMany(Category::class, 'category_subscriptions')
+            ->withTimestamps();
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->user_type === 'admin';
+    }
+
+    public function isPromotor(): bool
+    {
+        return $this->is_promotor;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->is_verified;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->is_suspended;
+    }
+
+    public function promotorDetail()
+    {
+        return $this->hasOne(PromotorDetail::class);
     }
 
     // Scopes

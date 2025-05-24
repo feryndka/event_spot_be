@@ -5,195 +5,414 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\Api\EventResource;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
   public function index(Request $request)
   {
-    $query = Event::with(['category', 'promotor', 'tags'])
-      ->published()
-      ->approved();
-
-    // Filter by category
-    if ($request->has('category')) {
-      $query->whereHas('category', function ($q) use ($request) {
-        $q->where('slug', $request->category);
-      });
-    }
-
-    // Filter by date
-    if ($request->has('date')) {
-      switch ($request->date) {
-        case 'upcoming':
+    try {
+      $query = Event::query()
+        ->with(['promotor', 'category', 'images', 'tags'])
+        ->when($request->search, function ($query, $search) {
+          $query->search($search);
+        })
+        ->when($request->category_id, function ($query, $categoryId) {
+          $query->byCategory($categoryId);
+        })
+        ->when($request->featured, function ($query) {
+          $query->featured();
+        })
+        ->when($request->upcoming, function ($query) {
           $query->upcoming();
-          break;
-        case 'ongoing':
+        })
+        ->when($request->ongoing, function ($query) {
           $query->ongoing();
-          break;
-        case 'past':
+        })
+        ->when($request->past, function ($query) {
           $query->past();
-          break;
+        })
+        ->when($request->free, function ($query) {
+          $query->free();
+        })
+        ->when($request->paid, function ($query) {
+          $query->paid();
+        });
+
+      // If user is promotor and authenticated, only show their events
+      if (Auth::check() && Auth::user()->user_type === 'promotor') {
+        $query->where('promotor_id', Auth::id());
       }
+
+      $events = $query->latest()->paginate(10);
+
+      return EventResource::collection($events);
+    } catch (\Exception $e) {
+      Log::error('Error in event index: ' . $e->getMessage());
+      Log::error('Stack trace: ' . $e->getTraceAsString());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to load events',
+        'debug' => config('app.debug') ? $e->getMessage() : null
+      ], 500);
     }
-
-    // Filter by price
-    if ($request->has('price')) {
-      if ($request->price === 'free') {
-        $query->free();
-      } else {
-        $query->paid();
-      }
-    }
-
-    // Search
-    if ($request->has('search')) {
-      $query->where(function ($q) use ($request) {
-        $q->where('title', 'like', '%' . $request->search . '%')
-          ->orWhere('description', 'like', '%' . $request->search . '%');
-      });
-    }
-
-    // Sort
-    $sort = $request->get('sort', 'start_date');
-    $direction = $request->get('direction', 'asc');
-    $query->orderBy($sort, $direction);
-
-    $events = $query->paginate(10);
-
-    return response()->json($events);
-  }
-
-  public function show(Event $event)
-  {
-    $event->load(['category', 'promotor', 'tags', 'comments.user', 'statistics']);
-    return response()->json($event);
   }
 
   public function store(Request $request)
   {
-    $validator = Validator::make($request->all(), [
-      'title' => 'required|string|max:255',
-      'description' => 'required|string',
-      'category_id' => 'required|exists:categories,id',
-      'location_name' => 'required|string|max:255',
-      'address' => 'required|string',
-      'latitude' => 'nullable|numeric',
-      'longitude' => 'nullable|numeric',
-      'start_date' => 'required|date',
-      'end_date' => 'required|date|after:start_date',
-      'registration_start' => 'required|date',
-      'registration_end' => 'required|date|after:registration_start|before:start_date',
-      'is_free' => 'required|boolean',
-      'price' => 'required_if:is_free,false|numeric|min:0',
-      'max_attendees' => 'nullable|integer|min:1',
-      'poster_image' => 'nullable|image|max:2048',
-      'tags' => 'nullable|array',
-      'tags.*' => 'exists:event_tags,id',
-    ]);
+    try {
+      $validator = Validator::make($request->all(), [
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'category_id' => 'required|exists:categories,id',
+        'location_name' => 'required|string|max:255',
+        'address' => 'required|string',
+        'latitude' => 'nullable|numeric',
+        'longitude' => 'nullable|numeric',
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after:start_date',
+        'registration_start' => 'required|date',
+        'registration_end' => 'required|date|after:registration_start|before:start_date',
+        'is_free' => 'boolean',
+        'price' => 'nullable|numeric|min:0',
+        'max_attendees' => 'nullable|integer|min:1',
+        'poster_image' => 'nullable|image|max:2048',
+        'images.*' => 'nullable|image|max:2048',
+        'tags' => 'nullable|array',
+        'tags.*' => 'exists:event_tags,id'
+      ]);
 
-    if ($validator->fails()) {
-      return response()->json(['errors' => $validator->errors()], 422);
+      if ($validator->fails()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Validation error',
+          'errors' => $validator->errors()
+        ], 422);
+      }
+
+      $data = $validator->validated();
+      $data['slug'] = Str::slug($data['title']);
+      $data['promotor_id'] = Auth::id();
+      $data['is_published'] = false; // Default to unpublished
+      $data['is_approved'] = false; // Default to unapproved
+
+      // Handle poster image upload
+      if ($request->hasFile('poster_image')) {
+        $data['poster_image'] = $request->file('poster_image')->store('events/posters', 'public');
+      }
+
+      $event = Event::create($data);
+
+      // Handle additional images
+      if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+          $path = $image->store('events/images', 'public');
+          $event->images()->create([
+            'image_path' => $path,
+            'image_type' => 'additional',
+            'is_primary' => false,
+            'order' => $event->images()->count() + 1
+          ]);
+        }
+      }
+
+      // Handle tags
+      if ($request->has('tags')) {
+        $event->tags()->sync($request->tags);
+      }
+
+      return new EventResource($event->load(['promotor', 'category', 'images', 'tags']));
+    } catch (\Exception $e) {
+      Log::error('Error in event store: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to create event'
+      ], 500);
     }
+  }
 
-    $data = $request->all();
-    $data['slug'] = Str::slug($request->title);
-    $data['promotor_id'] = $request->user()->id;
+  public function show(Event $event)
+  {
+    try {
+      // Load relationships
+      $event->load(['promotor', 'category', 'images', 'tags']);
 
-    if ($request->hasFile('poster_image')) {
-      $path = $request->file('poster_image')->store('event-posters', 'public');
-      $data['poster_image'] = $path;
+      // Only load statistics if user is promotor or admin
+      if (Auth::check() && (Auth::user()->user_type === 'promotor' || Auth::user()->user_type === 'admin')) {
+        $event->load('statistics');
+      }
+
+      // Increment views count
+      $event->increment('views_count');
+
+      return new EventResource($event);
+    } catch (\Exception $e) {
+      Log::error('Error in event show: ' . $e->getMessage());
+      Log::error('Stack trace: ' . $e->getTraceAsString());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to load event details',
+        'debug' => config('app.debug') ? $e->getMessage() : null
+      ], 500);
     }
-
-    $event = Event::create($data);
-
-    if ($request->has('tags')) {
-      $event->tags()->attach($request->tags);
-    }
-
-    return response()->json($event, 201);
   }
 
   public function update(Request $request, Event $event)
   {
-    if ($request->user()->id !== $event->promotor_id) {
-      return response()->json(['message' => 'Unauthorized'], 403);
+    try {
+      // Check if user is the promotor
+      if ($event->promotor_id !== Auth::id()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Unauthorized'
+        ], 403);
+      }
+
+      $validator = Validator::make($request->all(), [
+        'title' => 'string|max:255',
+        'description' => 'string',
+        'category_id' => 'exists:categories,id',
+        'location_name' => 'string|max:255',
+        'address' => 'string',
+        'latitude' => 'nullable|numeric',
+        'longitude' => 'nullable|numeric',
+        'start_date' => 'date',
+        'end_date' => 'date|after:start_date',
+        'registration_start' => 'date',
+        'registration_end' => 'date|after:registration_start|before:start_date',
+        'is_free' => 'boolean',
+        'price' => 'nullable|numeric|min:0',
+        'max_attendees' => 'nullable|integer|min:1',
+        'poster_image' => 'nullable|image|max:2048',
+        'images.*' => 'nullable|image|max:2048',
+        'tags' => 'nullable|array',
+        'tags.*' => 'exists:event_tags,id'
+      ]);
+
+      if ($validator->fails()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Validation error',
+          'errors' => $validator->errors()
+        ], 422);
+      }
+
+      $data = $validator->validated();
+
+      // Update slug if title is changed
+      if (isset($data['title'])) {
+        $data['slug'] = Str::slug($data['title']);
+      }
+
+      // Handle poster image upload
+      if ($request->hasFile('poster_image')) {
+        // Delete old poster
+        if ($event->poster_image) {
+          Storage::disk('public')->delete($event->poster_image);
+        }
+        $data['poster_image'] = $request->file('poster_image')->store('events/posters', 'public');
+      }
+
+      $event->update($data);
+
+      // Handle additional images
+      if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+          $path = $image->store('events/images', 'public');
+          $event->images()->create([
+            'image_path' => $path,
+            'image_type' => 'additional',
+            'is_primary' => false,
+            'order' => $event->images()->count() + 1
+          ]);
+        }
+      }
+
+      // Handle tags
+      if ($request->has('tags')) {
+        $event->tags()->sync($request->tags);
+      }
+
+      return new EventResource($event->load(['promotor', 'category', 'images', 'tags']));
+    } catch (\Exception $e) {
+      Log::error('Error in event update: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to update event'
+      ], 500);
     }
-
-    $validator = Validator::make($request->all(), [
-      'title' => 'sometimes|required|string|max:255',
-      'description' => 'sometimes|required|string',
-      'category_id' => 'sometimes|required|exists:categories,id',
-      'location_name' => 'sometimes|required|string|max:255',
-      'address' => 'sometimes|required|string',
-      'latitude' => 'nullable|numeric',
-      'longitude' => 'nullable|numeric',
-      'start_date' => 'sometimes|required|date',
-      'end_date' => 'sometimes|required|date|after:start_date',
-      'registration_start' => 'sometimes|required|date',
-      'registration_end' => 'sometimes|required|date|after:registration_start|before:start_date',
-      'is_free' => 'sometimes|required|boolean',
-      'price' => 'required_if:is_free,false|numeric|min:0',
-      'max_attendees' => 'nullable|integer|min:1',
-      'poster_image' => 'nullable|image|max:2048',
-      'tags' => 'nullable|array',
-      'tags.*' => 'exists:event_tags,id',
-    ]);
-
-    if ($validator->fails()) {
-      return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    $data = $request->all();
-    if ($request->has('title')) {
-      $data['slug'] = Str::slug($request->title);
-    }
-
-    if ($request->hasFile('poster_image')) {
-      $path = $request->file('poster_image')->store('event-posters', 'public');
-      $data['poster_image'] = $path;
-    }
-
-    $event->update($data);
-
-    if ($request->has('tags')) {
-      $event->tags()->sync($request->tags);
-    }
-
-    return response()->json($event);
   }
 
-  public function destroy(Request $request, Event $event)
+  public function destroy(Event $event)
   {
-    if ($request->user()->id !== $event->promotor_id) {
-      return response()->json(['message' => 'Unauthorized'], 403);
-    }
+    try {
+      // Check if user is the promotor
+      if ($event->promotor_id !== Auth::id()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Unauthorized'
+        ], 403);
+      }
 
-    $event->delete();
-    return response()->json(null, 204);
+      // Delete poster image
+      if ($event->poster_image) {
+        Storage::disk('public')->delete($event->poster_image);
+      }
+
+      // Delete additional images
+      foreach ($event->images as $image) {
+        Storage::disk('public')->delete($image->image_path);
+      }
+
+      $event->delete();
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Event deleted successfully'
+      ]);
+    } catch (\Exception $e) {
+      Log::error('Error in event destroy: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to delete event'
+      ], 500);
+    }
   }
 
-  public function register(Request $request, Event $event)
+  public function publish(Event $event)
   {
-    if ($event->registration_end < now()) {
-      return response()->json(['message' => 'Registration period has ended'], 400);
+    try {
+      if ($event->promotor_id !== Auth::id()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Unauthorized'
+        ], 403);
+      }
+
+      $event->update(['is_published' => true]);
+
+      return new EventResource($event->load(['promotor', 'category', 'images', 'tags']));
+    } catch (\Exception $e) {
+      Log::error('Error in event publish: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to publish event'
+      ], 500);
     }
+  }
 
-    if ($event->max_attendees && $event->attendees()->count() >= $event->max_attendees) {
-      return response()->json(['message' => 'Event is full'], 400);
+  public function unpublish(Event $event)
+  {
+    try {
+      if ($event->promotor_id !== Auth::id()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Unauthorized'
+        ], 403);
+      }
+
+      $event->update(['is_published' => false]);
+
+      return new EventResource($event->load(['promotor', 'category', 'images', 'tags']));
+    } catch (\Exception $e) {
+      Log::error('Error in event unpublish: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to unpublish event'
+      ], 500);
     }
+  }
 
-    $attendee = $event->attendees()->create([
-      'user_id' => $request->user()->id,
-      'status' => $event->is_free ? 'registered' : 'pending_payment',
-    ]);
+  public function getStatistics(Event $event)
+  {
+    try {
+      if ($event->promotor_id !== Auth::id()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Unauthorized'
+        ], 403);
+      }
 
-    if (!$event->is_free) {
-      // Handle payment creation here
-      // This will be implemented with Midtrans integration
+      return response()->json([
+        'status' => 'success',
+        'data' => [
+          'views' => $event->views_count,
+          'registrations' => $event->registrations()->count(),
+          'favorites' => $event->favorites()->count(),
+          'shares' => $event->shares()->count(),
+          'comments' => $event->comments()->count(),
+          'reviews' => $event->reviews()->count(),
+          'average_rating' => $event->averageRating(),
+          'total_revenue' => $event->payments()->where('status', 'completed')->sum('amount')
+        ]
+      ]);
+    } catch (\Exception $e) {
+      Log::error('Error in event statistics: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to get event statistics'
+      ], 500);
     }
+  }
 
-    return response()->json($attendee, 201);
+  public function getAttendees(Event $event)
+  {
+    try {
+      if ($event->promotor_id !== Auth::id()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Unauthorized'
+        ], 403);
+      }
+
+      $attendees = $event->registrations()
+        ->with('user')
+        ->latest()
+        ->paginate(10);
+
+      return response()->json([
+        'status' => 'success',
+        'data' => $attendees
+      ]);
+    } catch (\Exception $e) {
+      Log::error('Error in event attendees: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to get event attendees'
+      ], 500);
+    }
+  }
+
+  public function getPayments(Event $event)
+  {
+    try {
+      if ($event->promotor_id !== Auth::id()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Unauthorized'
+        ], 403);
+      }
+
+      $payments = $event->payments()
+        ->with('user')
+        ->latest()
+        ->paginate(10);
+
+      return response()->json([
+        'status' => 'success',
+        'data' => $payments
+      ]);
+    } catch (\Exception $e) {
+      Log::error('Error in event payments: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to get event payments'
+      ], 500);
+    }
   }
 }
