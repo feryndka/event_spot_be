@@ -72,122 +72,124 @@ Route::prefix('categories')->group(function () {
     Route::get('/{category}', [CategoryController::class, 'show']); // Get category detail with events
 });
 
-// ==================== Protected Routes ====================
-Route::middleware('auth:sanctum')->group(function () {
-    // User Dashboard
-    // Route::prefix('dashboard')->group(function () {
-    //     Route::get('/overview', [UserDashboardController::class, 'overview']);
-    //     Route::get('/events', [UserDashboardController::class, 'events']);
-    //     Route::get('/notifications', [UserDashboardController::class, 'notifications']);
-    // });
+// ======================= User Routes ======================
+// User Dashboard
+// Route::prefix('dashboard')->group(function () {
+//     Route::get('/overview', [UserDashboardController::class, 'overview']);
+//     Route::get('/events', [UserDashboardController::class, 'events']);
+//     Route::get('/notifications', [UserDashboardController::class, 'notifications']);
+// });
 
-    // Event Attendance
-    // Route::prefix('events')->group(function () {
-    //     Route::get('/upcoming', [EventAttendanceController::class, 'upcomingEvents']);
-    //     Route::get('/history', [EventAttendanceController::class, 'eventHistory']);
-    //     Route::get('/{event}/attendance', [EventAttendanceController::class, 'attendanceDetails']);
-    //     Route::post('/{event}/register', [EventAttendanceController::class, 'register']);
-    //     Route::delete('/{event}/register', [EventAttendanceController::class, 'cancelRegistration']);
-    // });
-
-    // Enhanced Event Search
-    // Route::prefix('search')->group(function () {
-    //     Route::get('/events', [EventSearchController::class, 'search']);
-    //     Route::get('/events/location/{location}', [EventSearchController::class, 'byLocation']);
-    //     Route::get('/events/date/{date}', [EventSearchController::class, 'byDate']);
-    //     Route::get('/events/nearby', [EventSearchController::class, 'nearby']);
-    // });
-
-    // User Preferences Routes
-    // Route::prefix('preferences')->group(function () {
-    //     Route::get('/', [UserPreferenceController::class, 'show']); // Get user preferences
-    //     Route::put('/', [UserPreferenceController::class, 'update']); // Update user preferences
-    // });
-
-    // Event Interaction Routes
-    // Route::prefix('events')->group(function () {
-    //     Route::post('/{event}/register', [EventController::class, 'register']); // Register for event
-    //     Route::post('/{event}/bookmark', [UserBookmarkController::class, 'store']); // Bookmark event
-    //     Route::delete('/{event}/bookmark', [UserBookmarkController::class, 'destroy']); // Remove bookmark
-    // });
-
-    // Comment Routes
-    // Route::prefix('comments')->group(function () {
-    //     Route::post('/events/{event}', [CommentController::class, 'store']); // Add comment
-    //     Route::put('/{comment}', [CommentController::class, 'update']); // Update comment
-    //     Route::delete('/{comment}', [CommentController::class, 'destroy']); // Delete comment
-    // });
-
-    // Subscription Routes
-    // Route::prefix('subscriptions')->group(function () {
-    //     Route::post('/promotors/{promotor}', [FollowerController::class, 'store']); // Follow promotor
-    //     Route::delete('/promotors/{promotor}', [FollowerController::class, 'destroy']); // Unfollow promotor
-    //     Route::post('/categories/{category}', [CategorySubscriptionController::class, 'store']); // Subscribe to category
-    //     Route::delete('/categories/{category}', [CategorySubscriptionController::class, 'destroy']); // Unsubscribe from category
-    // });
-
-    // Payment Routes
-    // Route::prefix('payments')->group(function () {
-    //     Route::post('/events/{event}', [PaymentController::class, 'process']); // Process payment
-    //     Route::get('/events/{event}/status', [PaymentController::class, 'checkStatus']); // Check payment status
-    //     Route::post('/events/{event}/refund', [PaymentController::class, 'refund']); // Request refund
-    // });
-
-    // ==================== Promotor Routes ====================
-    Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::class])->prefix('promotor')->group(function () {
-        // Event Management
-        Route::apiResource('events', EventController::class);
-        // Route::post('events/{event}/publish', [EventController::class, 'publish']);
-        // Route::post('events/{event}/unpublish', [EventController::class, 'unpublish']);
-        // Route::get('events/{event}/statistics', [EventController::class, 'getStatistics']);
-        // Route::get('events/{event}/attendees', [EventController::class, 'getAttendees']);
-        // Route::get('events/{event}/payments', [EventController::class, 'getPayments']);
-
-        // Event Image Management
-        // Route::prefix('events/{event}/images')->group(function () {
-        //     Route::post('/', [PromotorEventImageController::class, 'store']);
-        //     Route::put('/{image}', [PromotorEventImageController::class, 'update']);
-        //     Route::delete('/{image}', [PromotorEventImageController::class, 'destroy']);
-        //     Route::post('/{image}/reorder', [PromotorEventImageController::class, 'reorder']);
-        // });
-
-        // Event Comment Management
-        // Route::prefix('events/{event}/comments')->group(function () {
-        //     Route::get('/', [EventCommentManagementController::class, 'index']);
-        //     Route::get('/{comment}', [EventCommentManagementController::class, 'show']);
-        //     Route::delete('/{comment}', [EventCommentManagementController::class, 'destroy']);
-        //     Route::post('/{comment}/reply', [EventCommentManagementController::class, 'reply']);
-        //     Route::get('/statistics', [EventCommentManagementController::class, 'getStatistics']);
-        // });
-
-        // Promotor Profile
-        // Route::get('/profile', [PromotorProfileController::class, 'show']);
-        // Route::put('/profile', [PromotorProfileController::class, 'update']);
-        // Route::get('/profile/followers', [PromotorProfileController::class, 'getFollowers']);
-        // Route::get('/profile/statistics', [PromotorProfileController::class, 'getStatistics']);
+// Event Attendance
+Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])->prefix('user')->group(function () {
+    Route::prefix('events')->group(function () {
+        Route::get('/upcoming', [EventAttendanceController::class, 'upcomingEvents']);
+        Route::get('/history', [EventAttendanceController::class, 'eventHistory']);
+        Route::get('/{event}/attendance', [EventAttendanceController::class, 'attendanceDetails']);
+        Route::post('/{event}/register', [EventAttendanceController::class, 'register']);
+        Route::delete('/{event}/register', [EventAttendanceController::class, 'cancelRegistration']);
     });
+});
 
-    // ==================== Admin Routes ====================
-    Route::middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->group(function () {
-        // Admin Dashboard
-        Route::get('/dashboard', [AdminController::class, 'dashboard']);
+// Enhanced Event Search
+// Route::prefix('search')->group(function () {
+//     Route::get('/events', [EventSearchController::class, 'search']);
+//     Route::get('/events/location/{location}', [EventSearchController::class, 'byLocation']);
+//     Route::get('/events/date/{date}', [EventSearchController::class, 'byDate']);
+//     Route::get('/events/nearby', [EventSearchController::class, 'nearby']);
+// });
 
-        // Admin Mangement Verification for Promotor
-        Route::get('/verifications', [AdminVerificationController::class, 'index']);
-        Route::get('/verifications/{promotor}', [AdminVerificationController::class, 'show']);
-        Route::put('/verifications/{promotor}/approve', [AdminVerificationController::class, 'approve']);
-        Route::put('/verifications/{promotor}/reject', [AdminVerificationController::class, 'reject']);
+// User Preferences Routes
+// Route::prefix('preferences')->group(function () {
+//     Route::get('/', [UserPreferenceController::class, 'show']); // Get user preferences
+//     Route::put('/', [UserPreferenceController::class, 'update']); // Update user preferences
+// });
 
-        // Admin Management Category
-        Route::apiResource('categories', AdminCategoryController::class);
+// Event Interaction Routes
+// Route::prefix('events')->group(function () {
+//     Route::post('/{event}/register', [EventController::class, 'register']); // Register for event
+//     Route::post('/{event}/bookmark', [UserBookmarkController::class, 'store']); // Bookmark event
+//     Route::delete('/{event}/bookmark', [UserBookmarkController::class, 'destroy']); // Remove bookmark
+// });
 
-        // Admin Management Event
-        Route::apiResource('event-tags', AdminEventTagController::class);
-        Route::delete('/events/{event}', [EventController::class, 'destroy']);
+// Comment Routes
+// Route::prefix('comments')->group(function () {
+//     Route::post('/events/{event}', [CommentController::class, 'store']); // Add comment
+//     Route::put('/{comment}', [CommentController::class, 'update']); // Update comment
+//     Route::delete('/{comment}', [CommentController::class, 'destroy']); // Delete comment
+// });
 
-        // Admin Management User
-        Route::apiResource('users', AdminUserController::class);
-        Route::put('/users/{user}/active', [AdminUserController::class, 'updateActive']);
-        Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole']);
-    });
+// Subscription Routes
+// Route::prefix('subscriptions')->group(function () {
+//     Route::post('/promotors/{promotor}', [FollowerController::class, 'store']); // Follow promotor
+//     Route::delete('/promotors/{promotor}', [FollowerController::class, 'destroy']); // Unfollow promotor
+//     Route::post('/categories/{category}', [CategorySubscriptionController::class, 'store']); // Subscribe to category
+//     Route::delete('/categories/{category}', [CategorySubscriptionController::class, 'destroy']); // Unsubscribe from category
+// });
+
+// Payment Routes
+// Route::prefix('payments')->group(function () {
+//     Route::post('/events/{event}', [PaymentController::class, 'process']); // Process payment
+//     Route::get('/events/{event}/status', [PaymentController::class, 'checkStatus']); // Check payment status
+//     Route::post('/events/{event}/refund', [PaymentController::class, 'refund']); // Request refund
+// });
+
+// ==================== Promotor Routes ====================
+Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::class])->prefix('promotor')->group(function () {
+    // Event Management
+    Route::apiResource('events', EventController::class);
+    // Route::post('events/{event}/publish', [EventController::class, 'publish']);
+    // Route::post('events/{event}/unpublish', [EventController::class, 'unpublish']);
+    // Route::get('events/{event}/statistics', [EventController::class, 'getStatistics']);
+    // Route::get('events/{event}/attendees', [EventController::class, 'getAttendees']);
+    // Route::get('events/{event}/payments', [EventController::class, 'getPayments']);
+
+    // Event Image Management
+    // Route::prefix('events/{event}/images')->group(function () {
+    //     Route::post('/', [PromotorEventImageController::class, 'store']);
+    //     Route::put('/{image}', [PromotorEventImageController::class, 'update']);
+    //     Route::delete('/{image}', [PromotorEventImageController::class, 'destroy']);
+    //     Route::post('/{image}/reorder', [PromotorEventImageController::class, 'reorder']);
+    // });
+
+    // Event Comment Management
+    // Route::prefix('events/{event}/comments')->group(function () {
+    //     Route::get('/', [EventCommentManagementController::class, 'index']);
+    //     Route::get('/{comment}', [EventCommentManagementController::class, 'show']);
+    //     Route::delete('/{comment}', [EventCommentManagementController::class, 'destroy']);
+    //     Route::post('/{comment}/reply', [EventCommentManagementController::class, 'reply']);
+    //     Route::get('/statistics', [EventCommentManagementController::class, 'getStatistics']);
+    // });
+
+    // Promotor Profile
+    // Route::get('/profile', [PromotorProfileController::class, 'show']);
+    // Route::put('/profile', [PromotorProfileController::class, 'update']);
+    // Route::get('/profile/followers', [PromotorProfileController::class, 'getFollowers']);
+    // Route::get('/profile/statistics', [PromotorProfileController::class, 'getStatistics']);
+});
+
+// ==================== Admin Routes ====================
+Route::middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->group(function () {
+    // Admin Dashboard
+    Route::get('/dashboard', [AdminController::class, 'dashboard']);
+
+    // Admin Mangement Verification for Promotor
+    Route::get('/verifications', [AdminVerificationController::class, 'index']);
+    Route::get('/verifications/{promotor}', [AdminVerificationController::class, 'show']);
+    Route::put('/verifications/{promotor}/approve', [AdminVerificationController::class, 'approve']);
+    Route::put('/verifications/{promotor}/reject', [AdminVerificationController::class, 'reject']);
+
+    // Admin Management Category
+    Route::apiResource('categories', AdminCategoryController::class);
+
+    // Admin Management Event Tags
+    Route::apiResource('event-tags', AdminEventTagController::class);
+
+    // Admin Delete Event
+    Route::delete('/events/{event}', [EventController::class, 'destroy']);
+
+    // Admin Management User
+    Route::apiResource('users', AdminUserController::class);
+    Route::put('/users/{user}/active', [AdminUserController::class, 'updateActive']);
+    Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole']);
 });
