@@ -25,7 +25,7 @@ use App\Http\Controllers\Admin\EventManagementController as AdminEventController
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminEventTagController;
 use App\Http\Controllers\Admin\PromotorVerificationController as AdminVerificationController;
-use App\Http\Controllers\Admin\UserManagementController as AdminUserController;
+use App\Http\Controllers\Admin\AdminUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -169,16 +169,25 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ==================== Admin Routes ====================
     Route::middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->group(function () {
+        // Admin Dashboard
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
+
+        // Admin Mangement Verification for Promotor
         Route::get('/verifications', [AdminVerificationController::class, 'index']);
         Route::get('/verifications/{promotor}', [AdminVerificationController::class, 'show']);
         Route::put('/verifications/{promotor}/approve', [AdminVerificationController::class, 'approve']);
         Route::put('/verifications/{promotor}/reject', [AdminVerificationController::class, 'reject']);
+
+        // Admin Management Category
         Route::apiResource('categories', AdminCategoryController::class);
+
+        // Admin Management Event
         Route::apiResource('event-tags', AdminEventTagController::class);
         Route::delete('/events/{event}', [EventController::class, 'destroy']);
-        // Route::apiResource('users', AdminUserController::class);
-        // Route::put('/users/{user}/status', [AdminUserController::class, 'updateStatus']);
-        // Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole']);
+
+        // Admin Management User
+        Route::apiResource('users', AdminUserController::class);
+        Route::put('/users/{user}/active', [AdminUserController::class, 'updateActive']);
+        Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole']);
     });
 });
