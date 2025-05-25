@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
 
             $table->unique(['user_id', 'event_id'], 'unique_user_event_bookmark');
         });

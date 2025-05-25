@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Bookmark extends Model
 {
@@ -15,9 +16,19 @@ class Bookmark extends Model
   ];
 
   /**
+   * The attributes that should be cast.
+   *
+   * @var array<string, string>
+   */
+  protected $casts = [
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime'
+  ];
+
+  /**
    * Get the user that owns the bookmark.
    */
-  public function user()
+  public function user(): BelongsTo
   {
     return $this->belongsTo(User::class);
   }
@@ -25,7 +36,7 @@ class Bookmark extends Model
   /**
    * Get the event that is bookmarked.
    */
-  public function event()
+  public function event(): BelongsTo
   {
     return $this->belongsTo(Event::class);
   }

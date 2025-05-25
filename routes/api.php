@@ -20,7 +20,7 @@ use App\Http\Controllers\Promotor\EventRegistrationManagementController;
 use App\Http\Controllers\Promotor\EventAnalyticsController;
 use App\Http\Controllers\Promotor\EventCommentManagementController;
 use App\Http\Controllers\Promotor\PromotorProfileController;
-use App\Http\Controllers\User\BookmarkController as UserBookmarkController;
+use App\Http\Controllers\User\BookmarkController;
 use App\Http\Controllers\Admin\EventManagementController as AdminEventController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminEventTagController;
@@ -104,12 +104,13 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
     //     Route::put('/', [UserPreferenceController::class, 'update']); // Update user preferences
     // });
 
-    // Event Interaction Routes
-    // Route::prefix('events')->group(function () {
-    //     Route::post('/{event}/register', [EventController::class, 'register']); // Register for event
-    //     Route::post('/{event}/bookmark', [UserBookmarkController::class, 'store']); // Bookmark event
-    //     Route::delete('/{event}/bookmark', [UserBookmarkController::class, 'destroy']); // Remove bookmark
-    // });
+    // Bookmark Routes
+    Route::prefix('bookmarks')->group(function () {
+        Route::get('/', [BookmarkController::class, 'index']);
+        Route::post('/events/{event}', [BookmarkController::class, 'store']);
+        Route::delete('/events/{event}', [BookmarkController::class, 'destroy']);
+        Route::get('/events/{event}/check', [BookmarkController::class, 'check']);
+    });
 
     // Comment Routes
     // Route::prefix('comments')->group(function () {
