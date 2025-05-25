@@ -415,4 +415,177 @@ class EventController extends Controller
       ], 500);
     }
   }
+
+  /**
+   * Search events with various filters
+   */
+  public function search(Request $request)
+  {
+    try {
+      $query = Event::query()
+        ->with(['promotor', 'category', 'images', 'tags']);
+      // ->where('is_published', true)
+      // ->where('is_approved', true)
+      // Search by title or description
+      if ($request->has('q')) {
+        $searchTerm = $request->q;
+        $query->where(function ($q) use ($searchTerm) {
+          $q->where('title', 'like', "%{$searchTerm}%")
+            ->orWhere('description', 'like', "%{$searchTerm}%");
+        });
+      }
+
+      // Filter by category
+      if ($request->has('category_id')) {
+        $query->where('category_id', $request->category_id);
+      }
+
+      // Filter by date range
+      if ($request->has('start_date')) {
+        $query->where('start_date', '>=', $request->start_date);
+      }
+      if ($request->has('end_date')) {
+        $query->where('end_date', '<=', $request->end_date);
+      }
+
+      // Filter by price
+      if ($request->has('is_free')) {
+        $query->where('is_free', $request->is_free);
+      }
+      if ($request->has('min_price')) {
+        $query->where('price', '>=', $request->min_price);
+      }
+      if ($request->has('max_price')) {
+        $query->where('price', '<=', $request->max_price);
+      }
+
+      // Filter by tags
+      if ($request->has('tags')) {
+        $tags = explode(',', $request->tags);
+        $query->whereHas('tags', function ($q) use ($tags) {
+          $q->whereIn('id', $tags);
+        });
+      }
+
+      $events = $query->latest()->paginate(10);
+
+      return EventResource::collection($events);
+    } catch (\Exception $e) {
+      Log::error('Error in event search: ' . $e->getMessage());
+      Log::error('Stack trace: ' . $e->getTraceAsString());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to search events',
+        'debug' => config('app.debug') ? $e->getMessage() : null
+      ], 500);
+    }
+  }
+
+  /**
+   * Search events by location
+   */
+  public function byLocation(Request $request, $location)
+  {
+    try {
+      $query = Event::query()
+        ->with(['promotor', 'category', 'images', 'tags'])
+        // ->where('is_published', true)
+        // ->where('is_approved', true)
+        ->where(function ($q) use ($location) {
+          $q->where('location_name', 'like', "%{$location}%")
+            ->orWhere('address', 'like', "%{$location}%");
+        });
+
+      $events = $query->latest()->paginate(10);
+
+      return EventResource::collection($events);
+    } catch (\Exception $e) {
+      Log::error('Error in location search: ' . $e->getMessage());
+      Log::error('Stack trace: ' . $e->getTraceAsString());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to search events by location',
+        'debug' => config('app.debug') ? $e->getMessage() : null
+      ], 500);
+    }
+  }
+
+  /**
+   * Search events by date
+   */
+  public function byDate(Request $request, $date)
+  {
+    try {
+      $query = Event::query()
+        ->with(['promotor', 'category', 'images', 'tags'])
+        // ->where('is_published', true)
+        // ->where('is_approved', true)
+        ->whereDate('start_date', $date);
+
+      $events = $query->latest()->paginate(10);
+
+      return EventResource::collection($events);
+    } catch (\Exception $e) {
+      Log::error('Error in date search: ' . $e->getMessage());
+      Log::error('Stack trace: ' . $e->getTraceAsString());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to search events by date',
+        'debug' => config('app.debug') ? $e->getMessage() : null
+      ], 500);
+    }
+  }
+
+  /**
+   * Search events nearby
+   */
+  public function nearby(Request $request)
+  {
+    try {
+      $validator = Validator::make($request->all(), [
+        'latitude' => 'required|numeric',
+        'longitude' => 'required|numeric',
+        'radius' => 'numeric|min:1|max:100' // radius in kilometers
+      ]);
+
+      if ($validator->fails()) {
+        return response()->json([
+          'status' => 'error',
+          'message' => 'Validation failed',
+          'errors' => $validator->errors()
+        ], 422);
+      }
+
+      $latitude = $request->latitude;
+      $longitude = $request->longitude;
+      $radius = $request->radius ?? 10; // default 10km
+
+      // Haversine formula to calculate distance
+      $query = Event::query()
+        ->with(['promotor', 'category', 'images', 'tags'])
+        ->where('is_published', true)
+        ->where('is_approved', true)
+        ->whereRaw("
+          (6371 * acos(
+            cos(radians(?)) * 
+            cos(radians(latitude)) * 
+            cos(radians(longitude) - radians(?)) + 
+            sin(radians(?)) * 
+            sin(radians(latitude))
+          )) <= ?
+        ", [$latitude, $longitude, $latitude, $radius]);
+
+      $events = $query->latest()->paginate(10);
+
+      return EventResource::collection($events);
+    } catch (\Exception $e) {
+      Log::error('Error in nearby search: ' . $e->getMessage());
+      Log::error('Stack trace: ' . $e->getTraceAsString());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to search nearby events',
+        'debug' => config('app.debug') ? $e->getMessage() : null
+      ], 500);
+    }
+  }
 }

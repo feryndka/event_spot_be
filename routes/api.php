@@ -73,15 +73,15 @@ Route::prefix('categories')->group(function () {
 });
 
 // ======================= User Routes ======================
-// User Dashboard
-// Route::prefix('dashboard')->group(function () {
-//     Route::get('/overview', [UserDashboardController::class, 'overview']);
-//     Route::get('/events', [UserDashboardController::class, 'events']);
-//     Route::get('/notifications', [UserDashboardController::class, 'notifications']);
-// });
-
-// Event Attendance
 Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])->prefix('user')->group(function () {
+    // User Dashboard
+    // Route::prefix('dashboard')->group(function () {
+    //     Route::get('/overview', [UserDashboardController::class, 'overview']);
+    //     Route::get('/events', [UserDashboardController::class, 'events']);
+    //     Route::get('/notifications', [UserDashboardController::class, 'notifications']);
+    // });
+
+    // Event Attendance
     Route::prefix('events')->group(function () {
         Route::get('/upcoming', [EventAttendanceController::class, 'upcomingEvents']);
         Route::get('/history', [EventAttendanceController::class, 'eventHistory']);
@@ -89,50 +89,50 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
         Route::post('/{event}/register', [EventAttendanceController::class, 'register']);
         Route::delete('/{event}/register', [EventAttendanceController::class, 'cancelRegistration']);
     });
+
+    // Enhanced Event Search By User
+    Route::prefix('search/events')->group(function () {
+        Route::get('/', [EventController::class, 'search']);
+        Route::get('/location/{location}', [EventController::class, 'byLocation']);
+        Route::get('/date/{date}', [EventController::class, 'byDate']);
+        Route::get('/nearby', [EventController::class, 'nearby']);
+    });
+
+    // User Preferences Routes
+    // Route::prefix('preferences')->group(function () {
+    //     Route::get('/', [UserPreferenceController::class, 'show']); // Get user preferences
+    //     Route::put('/', [UserPreferenceController::class, 'update']); // Update user preferences
+    // });
+
+    // Event Interaction Routes
+    // Route::prefix('events')->group(function () {
+    //     Route::post('/{event}/register', [EventController::class, 'register']); // Register for event
+    //     Route::post('/{event}/bookmark', [UserBookmarkController::class, 'store']); // Bookmark event
+    //     Route::delete('/{event}/bookmark', [UserBookmarkController::class, 'destroy']); // Remove bookmark
+    // });
+
+    // Comment Routes
+    // Route::prefix('comments')->group(function () {
+    //     Route::post('/events/{event}', [CommentController::class, 'store']); // Add comment
+    //     Route::put('/{comment}', [CommentController::class, 'update']); // Update comment
+    //     Route::delete('/{comment}', [CommentController::class, 'destroy']); // Delete comment
+    // });
+
+    // Subscription Routes
+    // Route::prefix('subscriptions')->group(function () {
+    //     Route::post('/promotors/{promotor}', [FollowerController::class, 'store']); // Follow promotor
+    //     Route::delete('/promotors/{promotor}', [FollowerController::class, 'destroy']); // Unfollow promotor
+    //     Route::post('/categories/{category}', [CategorySubscriptionController::class, 'store']); // Subscribe to category
+    //     Route::delete('/categories/{category}', [CategorySubscriptionController::class, 'destroy']); // Unsubscribe from category
+    // });
+
+    // Payment Routes
+    // Route::prefix('payments')->group(function () {
+    //     Route::post('/events/{event}', [PaymentController::class, 'process']); // Process payment
+    //     Route::get('/events/{event}/status', [PaymentController::class, 'checkStatus']); // Check payment status
+    //     Route::post('/events/{event}/refund', [PaymentController::class, 'refund']); // Request refund
+    // });
 });
-
-// Enhanced Event Search
-// Route::prefix('search')->group(function () {
-//     Route::get('/events', [EventSearchController::class, 'search']);
-//     Route::get('/events/location/{location}', [EventSearchController::class, 'byLocation']);
-//     Route::get('/events/date/{date}', [EventSearchController::class, 'byDate']);
-//     Route::get('/events/nearby', [EventSearchController::class, 'nearby']);
-// });
-
-// User Preferences Routes
-// Route::prefix('preferences')->group(function () {
-//     Route::get('/', [UserPreferenceController::class, 'show']); // Get user preferences
-//     Route::put('/', [UserPreferenceController::class, 'update']); // Update user preferences
-// });
-
-// Event Interaction Routes
-// Route::prefix('events')->group(function () {
-//     Route::post('/{event}/register', [EventController::class, 'register']); // Register for event
-//     Route::post('/{event}/bookmark', [UserBookmarkController::class, 'store']); // Bookmark event
-//     Route::delete('/{event}/bookmark', [UserBookmarkController::class, 'destroy']); // Remove bookmark
-// });
-
-// Comment Routes
-// Route::prefix('comments')->group(function () {
-//     Route::post('/events/{event}', [CommentController::class, 'store']); // Add comment
-//     Route::put('/{comment}', [CommentController::class, 'update']); // Update comment
-//     Route::delete('/{comment}', [CommentController::class, 'destroy']); // Delete comment
-// });
-
-// Subscription Routes
-// Route::prefix('subscriptions')->group(function () {
-//     Route::post('/promotors/{promotor}', [FollowerController::class, 'store']); // Follow promotor
-//     Route::delete('/promotors/{promotor}', [FollowerController::class, 'destroy']); // Unfollow promotor
-//     Route::post('/categories/{category}', [CategorySubscriptionController::class, 'store']); // Subscribe to category
-//     Route::delete('/categories/{category}', [CategorySubscriptionController::class, 'destroy']); // Unsubscribe from category
-// });
-
-// Payment Routes
-// Route::prefix('payments')->group(function () {
-//     Route::post('/events/{event}', [PaymentController::class, 'process']); // Process payment
-//     Route::get('/events/{event}/status', [PaymentController::class, 'checkStatus']); // Check payment status
-//     Route::post('/events/{event}/refund', [PaymentController::class, 'refund']); // Request refund
-// });
 
 // ==================== Promotor Routes ====================
 Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::class])->prefix('promotor')->group(function () {
