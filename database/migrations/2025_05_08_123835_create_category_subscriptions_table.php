@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('category_subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->timestamp('created_at')->useCurrent();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->timestamps();
 
-            $table->unique(['user_id', 'category_id'], 'unique_user_category');
+            // Prevent duplicate subscriptions
+            $table->unique(['user_id', 'category_id']);
         });
     }
 

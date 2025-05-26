@@ -121,12 +121,12 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
     });
 
     // Subscription Routes
-    // Route::prefix('subscriptions')->group(function () {
-    //     Route::post('/promotors/{promotor}', [FollowerController::class, 'store']); // Follow promotor
-    //     Route::delete('/promotors/{promotor}', [FollowerController::class, 'destroy']); // Unfollow promotor
-    //     Route::post('/categories/{category}', [CategorySubscriptionController::class, 'store']); // Subscribe to category
-    //     Route::delete('/categories/{category}', [CategorySubscriptionController::class, 'destroy']); // Unsubscribe from category
-    // });
+    Route::prefix('subscriptions')->group(function () {
+        Route::post('/promotors/{promotor}', [FollowerController::class, 'store']); // Follow promotor
+        Route::delete('/promotors/{promotor}', [FollowerController::class, 'destroy']); // Unfollow promotor
+        Route::post('/categories/{category}', [CategorySubscriptionController::class, 'store']); // Subscribe to category
+        Route::delete('/categories/{category}', [CategorySubscriptionController::class, 'destroy']); // Unsubscribe from category
+    });
 
     // Payment Routes
     // Route::prefix('payments')->group(function () {
