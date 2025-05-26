@@ -47,15 +47,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Authentication Routes
 Route::prefix('auth')->group(function () {
     // Public auth routes
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('register', [AuthController::class, 'register']); // Register for user
+    Route::post('login', [AuthController::class, 'login']); // Login all user
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']); // Forgot Password
+    Route::post('reset-password', [AuthController::class, 'resetPassword']); // Reset Password
 
     // Protected auth routes
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::get('me', [AuthController::class, 'me']);
+        Route::post('logout', [AuthController::class, 'logout']); // Logout all user
+        Route::get('me', [AuthController::class, 'me']); // Data user that already login
     });
 });
 
@@ -83,19 +83,19 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
 
     // Event Attendance
     Route::prefix('events')->group(function () {
-        Route::get('/upcoming', [EventAttendanceController::class, 'upcomingEvents']);
-        Route::get('/history', [EventAttendanceController::class, 'eventHistory']);
-        Route::get('/{event}/attendance', [EventAttendanceController::class, 'attendanceDetails']);
-        Route::post('/{event}/register', [EventAttendanceController::class, 'register']);
-        Route::delete('/{event}/register', [EventAttendanceController::class, 'cancelRegistration']);
+        Route::get('/upcoming', [EventAttendanceController::class, 'upcomingEvents']); // Events upcoming
+        Route::get('/history', [EventAttendanceController::class, 'eventHistory']); // Events history
+        Route::get('/{event}/attendance', [EventAttendanceController::class, 'attendanceDetails']); // Event attende
+        Route::post('/{event}/register', [EventAttendanceController::class, 'register']); // Event register
+        Route::delete('/{event}/register', [EventAttendanceController::class, 'cancelRegistration']); // Cancel event that already register
     });
 
     // Enhanced Event Search By User
     Route::prefix('search/events')->group(function () {
-        Route::get('/', [EventController::class, 'search']);
-        Route::get('/location/{location}', [EventController::class, 'byLocation']);
-        Route::get('/date/{date}', [EventController::class, 'byDate']);
-        Route::get('/nearby', [EventController::class, 'nearby']);
+        Route::get('/', [EventController::class, 'search']);  // Get search event
+        Route::get('/location/{location}', [EventController::class, 'byLocation']); // Get event by location
+        Route::get('/date/{date}', [EventController::class, 'byDate']); // Get event by date
+        Route::get('/nearby', [EventController::class, 'nearby']); // Get event nearest
     });
 
     // User Preferences Routes
@@ -106,10 +106,10 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
 
     // Bookmark Routes
     Route::prefix('bookmarks')->group(function () {
-        Route::get('/', [BookmarkController::class, 'index']);
-        Route::post('/events/{event}', [BookmarkController::class, 'store']);
-        Route::delete('/events/{event}', [BookmarkController::class, 'destroy']);
-        Route::get('/events/{event}/check', [BookmarkController::class, 'check']);
+        Route::get('/', [BookmarkController::class, 'index']); // Get all bookmarks
+        Route::post('/events/{event}', [BookmarkController::class, 'store']); // Add bookmarks events
+        Route::delete('/events/{event}', [BookmarkController::class, 'destroy']); // Delete bookmarks events
+        Route::get('/events/{event}/check', [BookmarkController::class, 'check']); //  Check if events bookmarks
     });
 
     // Comment Routes
@@ -139,7 +139,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
 // ==================== Promotor Routes ====================
 Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::class])->prefix('promotor')->group(function () {
     // Event Management
-    Route::apiResource('events', EventController::class);
+    Route::apiResource('events', EventController::class); // CRUD Event
     // Route::post('events/{event}/publish', [EventController::class, 'publish']);
     // Route::post('events/{event}/unpublish', [EventController::class, 'unpublish']);
     // Route::get('events/{event}/statistics', [EventController::class, 'getStatistics']);
@@ -163,10 +163,10 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::clas
     });
 
     // Promotor Profile
-    // Route::get('/profile', [PromotorProfileController::class, 'show']);
-    // Route::put('/profile', [PromotorProfileController::class, 'update']);
-    // Route::get('/profile/followers', [PromotorProfileController::class, 'getFollowers']);
-    // Route::get('/profile/statistics', [PromotorProfileController::class, 'getStatistics']);
+    Route::get('/profile', [PromotorProfileController::class, 'show']);
+    Route::put('/profile', [PromotorProfileController::class, 'update']);
+    Route::get('/profile/followers', [PromotorProfileController::class, 'getFollowers']);
+    Route::get('/profile/statistics', [PromotorProfileController::class, 'getStatistics']);
 });
 
 // ==================== Admin Routes ====================
