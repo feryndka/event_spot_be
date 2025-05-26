@@ -63,7 +63,7 @@ Route::prefix('auth')->group(function () {
 Route::prefix('events')->group(function () {
     Route::get('/', [EventController::class, 'index']); // List all events with filters
     Route::get('/{event}', [EventController::class, 'show']); // Get event details
-    // Route::get('/{event}/comments', [CommentController::class, 'index']); // Get event comments
+    Route::get('/{event}/comments', [CommentController::class, 'index']); // Get all comments (including replies)
 });
 
 // Public Category Routes
@@ -113,11 +113,12 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
     });
 
     // Comment Routes
-    // Route::prefix('comments')->group(function () {
-    //     Route::post('/events/{event}', [CommentController::class, 'store']); // Add comment
-    //     Route::put('/{comment}', [CommentController::class, 'update']); // Update comment
-    //     Route::delete('/{comment}', [CommentController::class, 'destroy']); // Delete comment
-    // });
+    Route::prefix('comments')->group(function () {
+        Route::post('/events/{event}', [CommentController::class, 'store']); // Add comment or reply
+        Route::put('/{comment}', [CommentController::class, 'update']); // Update own comment
+        Route::delete('/{comment}', [CommentController::class, 'destroy']); // Delete own comment
+        Route::get('/statistics', [CommentController::class, 'getStatistics']); // Get user's comment stats
+    });
 
     // Subscription Routes
     // Route::prefix('subscriptions')->group(function () {
@@ -153,14 +154,13 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::clas
     //     Route::post('/{image}/reorder', [PromotorEventImageController::class, 'reorder']);
     // });
 
-    // Event Comment Management
-    // Route::prefix('events/{event}/comments')->group(function () {
-    //     Route::get('/', [EventCommentManagementController::class, 'index']);
-    //     Route::get('/{comment}', [EventCommentManagementController::class, 'show']);
-    //     Route::delete('/{comment}', [EventCommentManagementController::class, 'destroy']);
-    //     Route::post('/{comment}/reply', [EventCommentManagementController::class, 'reply']);
-    //     Route::get('/statistics', [EventCommentManagementController::class, 'getStatistics']);
-    // });
+    // Event Comment Promotor
+    Route::prefix('comments')->group(function () {
+        Route::post('/events/{event}', [CommentController::class, 'store']); // Add comment or reply
+        Route::put('/{comment}', [CommentController::class, 'update']); // Update own comment
+        Route::delete('/{comment}', [CommentController::class, 'destroy']); // Delete own comment
+        Route::get('/statistics', [CommentController::class, 'getStatistics']); // Get user's comment stats
+    });
 
     // Promotor Profile
     // Route::get('/profile', [PromotorProfileController::class, 'show']);
@@ -193,4 +193,11 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class])
     Route::apiResource('users', AdminUserController::class);
     Route::put('/users/{user}/active', [AdminUserController::class, 'updateActive']);
     Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole']);
+
+    // Admin Comment Management
+    Route::prefix('comments')->group(function () {
+        Route::get('/statistics', [CommentController::class, 'getAdminStatistics']); // Get admin-level comment stats
+        Route::get('/events/{event}/statistics', [CommentController::class, 'getEventCommentStatistics']); // Get event-specific comment stats
+        Route::delete('/{comment}', [CommentController::class, 'deleteComment']); // Admin delete comment
+    });
 });
