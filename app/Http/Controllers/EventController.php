@@ -51,6 +51,7 @@ class EventController extends Controller
 
       $events = $query->latest()->paginate(10);
 
+      if (request()->segment(1) == 'api') return EventResource::collection($events);
       return EventResource::collection($events);
     } catch (\Exception $e) {
       Log::error('Error in event index: ' . $e->getMessage());

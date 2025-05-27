@@ -14,6 +14,11 @@ class CategoryController extends Controller
   public function index()
   {
     $categories = Category::withCount('events')->get();
+    if (request()->segment(1) == 'api') return response()->json([
+      'error' => false,
+      'list' => CategoryResource::collection($categories),
+    ]);
+
     return CategoryResource::collection($categories);
   }
 

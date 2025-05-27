@@ -17,6 +17,7 @@ class AdminEventTagController extends Controller
   {
     try {
       $tags = EventTag::withCount('events')->get();
+      if (request()->segment(1) == 'api') return EventTagResource::collection($tags);
       return EventTagResource::collection($tags);
     } catch (\Exception $e) {
       Log::error('Error in AdminEventTagController@index: ' . $e->getMessage());
