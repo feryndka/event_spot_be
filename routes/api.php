@@ -20,8 +20,8 @@ use App\Http\Controllers\Promotor\EventRegistrationManagementController;
 use App\Http\Controllers\Promotor\EventAnalyticsController;
 use App\Http\Controllers\Promotor\EventCommentManagementController;
 use App\Http\Controllers\Promotor\PromotorProfileController;
+use App\Http\Controllers\Promotor\PromotorEventImageController;
 use App\Http\Controllers\User\BookmarkController;
-use App\Http\Controllers\Admin\EventManagementController as AdminEventController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminEventTagController;
 use App\Http\Controllers\Admin\PromotorVerificationController as AdminVerificationController;
@@ -149,12 +149,12 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::clas
     });
 
     // Event Image Management
-    // Route::prefix('events/{event}/images')->group(function () {
-    //     Route::post('/', [PromotorEventImageController::class, 'store']);
-    //     Route::put('/{image}', [PromotorEventImageController::class, 'update']);
-    //     Route::delete('/{image}', [PromotorEventImageController::class, 'destroy']);
-    //     Route::post('/{image}/reorder', [PromotorEventImageController::class, 'reorder']);
-    // });
+    Route::prefix('events/{event}/images')->group(function () {
+        Route::post('/', [PromotorEventImageController::class, 'store']);
+        Route::put('/{image}', [PromotorEventImageController::class, 'update']);
+        Route::delete('/{image}', [PromotorEventImageController::class, 'destroy']);
+        Route::post('/{image}/reorder', [PromotorEventImageController::class, 'reorder']);
+    });
 
     // Event Comment Promotor
     Route::prefix('comments')->group(function () {
