@@ -163,10 +163,12 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::clas
     });
 
     // Promotor Profile
-    Route::get('/profile', [PromotorProfileController::class, 'show']);
-    Route::put('/profile', [PromotorProfileController::class, 'update']);
-    Route::get('/profile/followers', [PromotorProfileController::class, 'getFollowers']);
-    Route::get('/profile/statistics', [PromotorProfileController::class, 'getStatistics']);
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [PromotorProfileController::class, 'show']); // Show data profile
+        Route::put('/', [PromotorProfileController::class, 'update']); // Update data profile
+        Route::get('/followers', [PromotorProfileController::class, 'getFollowers']); // Get promotor followers
+        Route::get('/statistics', [PromotorProfileController::class, 'getStatistics']); // Get promotor statistics
+    });
 });
 
 // ==================== Admin Routes ====================

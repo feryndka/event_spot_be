@@ -113,3 +113,16 @@ URL: http://127.0.0.1:8000/api/promotor/events [POST]
     "max_attendees": 50,
     "tags": [1]
 }
+
+--------------------------------------------------------------------------
+TESTING PROFILE PROMOTOR
+URL: http://127.0.0.1:8000/api/promotor/profile [POST or PUT]
+{
+    "company_name": "Event Organizer Pro",
+    "description": "Kami adalah event organizer profesional yang telah berpengalaman lebih dari 5 tahun dalam mengelola berbagai acara seperti konser, seminar, dan pameran.",
+    "website": "https://eventorganizerpro.com",
+    "social_media": {
+        "instagram": "@eventorganizerpro",
+        "twitter": "@eventorganizerpro"
+    }
+}
