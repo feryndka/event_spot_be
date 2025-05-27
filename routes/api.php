@@ -139,12 +139,14 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
 // ==================== Promotor Routes ====================
 Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::class])->prefix('promotor')->group(function () {
     // Event Management
-    Route::apiResource('events', EventController::class); // CRUD Event
-    // Route::post('events/{event}/publish', [EventController::class, 'publish']);
-    // Route::post('events/{event}/unpublish', [EventController::class, 'unpublish']);
-    // Route::get('events/{event}/statistics', [EventController::class, 'getStatistics']);
-    // Route::get('events/{event}/attendees', [EventController::class, 'getAttendees']);
-    // Route::get('events/{event}/payments', [EventController::class, 'getPayments']);
+    Route::prefix('events')->group(function () {
+        Route::apiResource('/', EventController::class); // CRUD Event
+        Route::post('/{event}/publish', [EventController::class, 'publish']);
+        Route::post('/{event}/unpublish', [EventController::class, 'unpublish']);
+        Route::get('/{event}/statistics', [EventController::class, 'getStatistics']);
+        Route::get('/{event}/attendees', [EventController::class, 'getAttendees']);
+        Route::get('/{event}/payments', [EventController::class, 'getPayments']);
+    });
 
     // Event Image Management
     // Route::prefix('events/{event}/images')->group(function () {

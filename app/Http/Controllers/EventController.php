@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
-use App\Models\Category;
+use App\Models\EventAttendee;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Http\Resources\Api\EventResource;
+use App\Http\Resources\Api\EventAttendeeResource;
+use App\Http\Resources\Api\PaymentResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -329,28 +332,37 @@ class EventController extends Controller
     }
   }
 
+  /**
+   * Get event statistics
+   */
   public function getStatistics(Event $event)
   {
     try {
+      // Check if user is the event promotor
       if ($event->promotor_id !== Auth::id()) {
         return response()->json([
           'status' => 'error',
-          'message' => 'Unauthorized'
+          'message' => 'Unauthorized access'
         ], 403);
       }
 
+      $statistics = [
+        'total_registrations' => $event->attendees()->count(),
+        'total_attendees' => $event->attendees()->where('status', 'attended')->count(),
+        'total_cancellations' => $event->attendees()->where('status', 'cancelled')->count(),
+        'total_pending_payments' => $event->attendees()->where('status', 'pending_payment')->count(),
+        'total_comments' => $event->comments()->count(),
+        'attendance_rate' => $event->attendees()->count() > 0
+          ? round(($event->attendees()->where('status', 'attended')->count() / $event->attendees()->count()) * 100, 2) . '%'
+          : '0%',
+        'cancellation_rate' => $event->attendees()->count() > 0
+          ? round(($event->attendees()->where('status', 'cancelled')->count() / $event->attendees()->count()) * 100, 2) . '%'
+          : '0%'
+      ];
+
       return response()->json([
         'status' => 'success',
-        'data' => [
-          'views' => $event->views_count,
-          'registrations' => $event->registrations()->count(),
-          'favorites' => $event->favorites()->count(),
-          'shares' => $event->shares()->count(),
-          'comments' => $event->comments()->count(),
-          'reviews' => $event->reviews()->count(),
-          'average_rating' => $event->averageRating(),
-          'total_revenue' => $event->payments()->where('status', 'completed')->sum('amount')
-        ]
+        'data' => $statistics
       ]);
     } catch (\Exception $e) {
       Log::error('Error in event statistics: ' . $e->getMessage());
@@ -361,25 +373,30 @@ class EventController extends Controller
     }
   }
 
+  /**
+   * Get event attendees
+   */
   public function getAttendees(Event $event)
   {
     try {
+      // Check if user is the event promotor
       if ($event->promotor_id !== Auth::id()) {
         return response()->json([
           'status' => 'error',
-          'message' => 'Unauthorized'
+          'message' => 'Unauthorized access'
         ], 403);
       }
 
-      $attendees = $event->registrations()
-        ->with('user')
-        ->latest()
-        ->paginate(10);
+      $status = request()->query('status');
+      $query = $event->attendees()->with(['user', 'event']);
 
-      return response()->json([
-        'status' => 'success',
-        'data' => $attendees
-      ]);
+      if ($status) {
+        $query->where('status', $status);
+      }
+
+      $attendees = $query->latest()->paginate(15);
+
+      return EventAttendeeResource::collection($attendees);
     } catch (\Exception $e) {
       Log::error('Error in event attendees: ' . $e->getMessage());
       return response()->json([
@@ -389,25 +406,36 @@ class EventController extends Controller
     }
   }
 
+  /**
+   * Get event payments
+   */
   public function getPayments(Event $event)
   {
     try {
+      // Check if user is the event promotor
       if ($event->promotor_id !== Auth::id()) {
         return response()->json([
           'status' => 'error',
-          'message' => 'Unauthorized'
+          'message' => 'Unauthorized access'
         ], 403);
       }
 
-      $payments = $event->payments()
-        ->with('user')
-        ->latest()
-        ->paginate(10);
+      $status = request()->query('status');
+      $query = $event->attendees()
+        ->with(['user', 'payment'])
+        ->whereHas('payment');
 
-      return response()->json([
-        'status' => 'success',
-        'data' => $payments
-      ]);
+      if ($status) {
+        $query->whereHas('payment', function ($q) use ($status) {
+          $q->where('status', $status);
+        });
+      }
+
+      $payments = $query->latest()->paginate(15);
+
+      if (request()->segment(1) == 'api') return PaymentResource::collection($payments->pluck('payment'));
+
+      return PaymentResource::collection($payments->pluck('payment'));
     } catch (\Exception $e) {
       Log::error('Error in event payments: ' . $e->getMessage());
       return response()->json([
