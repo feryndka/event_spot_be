@@ -6,11 +6,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\CategorySubscriptionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\User\BookmarkController;
+use App\Http\Controllers\User\UserPreferenceController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\EventAttendanceController;
 use App\Http\Controllers\Promotor\PromotorProfileController;
@@ -93,10 +93,10 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
     });
 
     // User Preferences Routes
-    // Route::prefix('preferences')->group(function () {
-    //     Route::get('/', [UserPreferenceController::class, 'show']); // Get user preferences
-    //     Route::put('/', [UserPreferenceController::class, 'update']); // Update user preferences
-    // });
+    Route::prefix('preferences')->group(function () {
+        Route::get('/', [UserPreferenceController::class, 'show']); // Get user preferences
+        Route::put('/', [UserPreferenceController::class, 'update']); // Update user preferences
+    });
 
     // Bookmark Routes
     Route::prefix('bookmarks')->group(function () {
