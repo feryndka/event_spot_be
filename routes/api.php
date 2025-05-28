@@ -7,21 +7,15 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\UserPreferenceController;
-use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\CategorySubscriptionController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Admin\EventManagementController;
+use App\Http\Controllers\User\BookmarkController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\EventAttendanceController;
-use App\Http\Controllers\User\EventSearchController;
-use App\Http\Controllers\Promotor\EventRegistrationManagementController;
-use App\Http\Controllers\Promotor\EventAnalyticsController;
-use App\Http\Controllers\Promotor\EventCommentManagementController;
 use App\Http\Controllers\Promotor\PromotorProfileController;
 use App\Http\Controllers\Promotor\PromotorEventImageController;
-use App\Http\Controllers\User\BookmarkController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminEventTagController;
 use App\Http\Controllers\Admin\PromotorVerificationController as AdminVerificationController;
@@ -75,11 +69,11 @@ Route::prefix('categories')->group(function () {
 // ======================= User Routes ======================
 Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])->prefix('user')->group(function () {
     // User Dashboard
-    // Route::prefix('dashboard')->group(function () {
-    //     Route::get('/overview', [UserDashboardController::class, 'overview']);
-    //     Route::get('/events', [UserDashboardController::class, 'events']);
-    //     Route::get('/notifications', [UserDashboardController::class, 'notifications']);
-    // });
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/overview', [UserDashboardController::class, 'overview']);
+        Route::get('/events', [UserDashboardController::class, 'events']);
+        Route::get('/notifications', [UserDashboardController::class, 'notifications']);
+    });
 
     // Event Attendance
     Route::prefix('events')->group(function () {

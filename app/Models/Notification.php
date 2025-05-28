@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Notification extends Model
@@ -13,25 +12,21 @@ class Notification extends Model
 
     protected $fillable = [
         'user_id',
+        'title',
+        'content',
         'type',
-        'notifiable_type',
-        'notifiable_id',
-        'data',
-        'read_at',
+        'is_read',
+        'data'
     ];
 
     protected $casts = [
+        'is_read' => 'boolean',
         'data' => 'array',
-        'read_at' => 'datetime',
+        'created_at' => 'datetime'
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function notifiable(): MorphTo
-    {
-        return $this->morphTo();
     }
 }

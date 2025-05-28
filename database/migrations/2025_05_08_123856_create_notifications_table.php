@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('type', 50);
             $table->boolean('is_read')->default(false);
             $table->json('data')->nullable();
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
 
             $table->index('is_read');
         });
