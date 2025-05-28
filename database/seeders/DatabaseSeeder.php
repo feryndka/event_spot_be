@@ -15,11 +15,14 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             EventSeeder::class,
+            EventImageSeeder::class,
+            EventTagSeeder::class,
             EventAttendeeSeeder::class,
             PaymentSeeder::class,
             CommentSeeder::class,
             FollowerSeeder::class,
             CategorySubscriptionSeeder::class,
+            UserPreferenceSeeder::class,
         ]);
     }
 }

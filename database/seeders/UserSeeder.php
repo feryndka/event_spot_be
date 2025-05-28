@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
     // Create admin user
     User::create([
       'name' => 'Admin',
-      'email' => 'admin@example.com',
+      'email' => 'admin@eventspot.com',
       'password' => Hash::make('admin123'),
       'phone_number' => '081234567890',
       'user_type' => 'admin',
@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
     // Create regular users
     User::create([
       'name' => 'John Doe',
-      'email' => 'john@example.com',
+      'email' => 'john@gmail.com',
       'password' => Hash::make('password123'),
       'phone_number' => '081234567890',
       'user_type' => 'user',
@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
 
     User::create([
       'name' => 'Jane Smith',
-      'email' => 'jane@example.com',
+      'email' => 'jane@gmail.com',
       'password' => Hash::make('password123'),
       'phone_number' => '081234567891',
       'user_type' => 'user',
@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
     // Create promotor users
     $promotor1 = User::create([
       'name' => 'Event Organizer',
-      'email' => 'organizer@example.com',
+      'email' => 'organizer@gmail.com',
       'password' => Hash::make('password123'),
       'phone_number' => '081234567892',
       'user_type' => 'promotor',

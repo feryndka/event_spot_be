@@ -17,25 +17,35 @@ class EventAttendeeSeeder extends Seeder
     // Get all events
     $events = Event::all();
 
+    $statuses = [
+      'pending_payment',
+      'registered',
+      'attended',
+      'cancelled'
+    ];
+
     // Create attendees for each event
     foreach ($events as $event) {
       // Get number of available users
       $availableUsers = $users->count();
 
-      // Determine how many users to add (1 or 2, depending on available users)
-      $numUsers = min(rand(1, 2), $availableUsers);
+      // Determine how many users to add (2-4, depending on available users)
+      $numUsers = min(rand(2, 4), $availableUsers);
 
       // Add random users as attendees
       $randomUsers = $users->random($numUsers);
 
       foreach ($randomUsers as $user) {
-        EventAttendee::create([
+        $status = $statuses[array_rand($statuses)];
+        $registrationDate = now()->subDays(rand(1, 30));
+
+        $attendee = EventAttendee::create([
           'event_id' => $event->id,
           'user_id' => $user->id,
-          'status' => 'registered',
-          'registration_date' => now(),
-          'ticket_code' => 'TIX-' . strtoupper(uniqid()),
-          'check_in_time' => null
+          'status' => $status,
+          'registration_date' => $registrationDate,
+          'ticket_code' => $status === 'registered' || $status === 'attended' ? 'TIX-' . strtoupper(uniqid()) : null,
+          'check_in_time' => $status === 'attended' ? $registrationDate->addDays(rand(1, 5)) : null
         ]);
       }
     }

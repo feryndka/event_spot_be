@@ -8,7 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\CategorySubscriptionController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\User\PaymentController;
 use App\Http\Controllers\User\BookmarkController;
 use App\Http\Controllers\User\UserPreferenceController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -123,11 +123,11 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
     });
 
     // Payment Routes
-    // Route::prefix('payments')->group(function () {
-    //     Route::post('/events/{event}', [PaymentController::class, 'process']); // Process payment
-    //     Route::get('/events/{event}/status', [PaymentController::class, 'checkStatus']); // Check payment status
-    //     Route::post('/events/{event}/refund', [PaymentController::class, 'refund']); // Request refund
-    // });
+    Route::prefix('payments')->group(function () {
+        Route::post('/events/{event}', [PaymentController::class, 'process']); // Process payment
+        Route::get('/events/{event}/status', [PaymentController::class, 'checkStatus']); // Check payment status
+        Route::post('/events/{event}/refund', [PaymentController::class, 'refund']); // Request refund
+    });
 });
 
 // ==================== Promotor Routes ====================
