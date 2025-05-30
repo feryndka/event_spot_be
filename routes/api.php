@@ -49,8 +49,10 @@ Route::prefix('auth')->group(function () {
     // Public auth routes
     Route::post('register', [AuthController::class, 'register']); // Register for user
     Route::post('login', [AuthController::class, 'login']); // Login all user
-    Route::post('forgot-password', [AuthController::class, 'forgotPassword']); // Forgot Password
-    Route::post('reset-password', [AuthController::class, 'resetPassword']); // Reset Password
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('forgot-password-raw', [AuthController::class, 'forgotPasswordWithRawToken']);
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
+    
 
     // Protected auth routes
     Route::middleware('auth:sanctum')->group(function () {
