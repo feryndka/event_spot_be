@@ -20,7 +20,7 @@ class EventAttendanceController extends Controller
 
       $events = Event::whereHas('attendees', function ($query) use ($user) {
         $query->where('user_id', $user->id)
-          ->where('status', 'registered');
+          ->whereIn('status', ['registered', 'pending_payment']);
       })
         ->where('start_date', '>', now())
         ->with(['promotor', 'category', 'images', 'tags'])
@@ -48,12 +48,6 @@ class EventAttendanceController extends Controller
         $query->where('user_id', $user->id)
           ->whereIn('status', ['attended', 'cancelled']);
       })
-        ->where(function ($query) {
-          $query->where('end_date', '<', now())
-            ->orWhereHas('attendees', function ($q) {
-              $q->where('status', 'cancelled');
-            });
-        })
         ->with(['promotor', 'category', 'images', 'tags', 'attendees' => function ($query) use ($user) {
           $query->where('user_id', $user->id);
         }])
