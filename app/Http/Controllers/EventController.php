@@ -148,7 +148,21 @@ class EventController extends Controller
 
       // Only load statistics if user is promotor or admin
       if (Auth::check() && (Auth::user()->user_type === 'promotor' || Auth::user()->user_type === 'admin')) {
-        $event->load('statistics');
+        // Check if the event belongs to the promotor
+        if ($event->promotor_id !== Auth::id()) {
+          return response()->json([
+            'status' => 'error',
+            'message' => 'Unauthorized access'
+          ], 403);
+        }
+        // Load statistics data
+        $event->statistics = [
+          'total_registrations' => $event->attendees()->count(),
+          'total_attendees' => $event->attendees()->where('status', 'attended')->count(),
+          'total_cancellations' => $event->attendees()->where('status', 'cancelled')->count(),
+          'total_pending_payments' => $event->attendees()->where('status', 'pending_payment')->count(),
+          'total_comments' => $event->comments()->count()
+        ];
       }
 
       // Increment views count

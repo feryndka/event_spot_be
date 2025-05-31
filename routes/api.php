@@ -46,7 +46,6 @@ Route::prefix('auth')->group(function () {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('forgot-password-raw', [AuthController::class, 'forgotPasswordWithRawToken']);
     Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
-    
 
     // Protected auth routes
     Route::middleware('auth:sanctum')->group(function () {
@@ -136,7 +135,11 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
 Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::class])->prefix('promotor')->group(function () {
     // Event Management
     Route::prefix('events')->group(function () {
-        Route::apiResource('/', EventController::class); // CRUD Event
+        Route::get('/', [EventController::class, 'index']);
+        Route::post('/', [EventController::class, 'store']);
+        Route::get('/{event}', [EventController::class, 'show']);
+        Route::put('/{event}', [EventController::class, 'update']);
+        Route::delete('/{event}', [EventController::class, 'destroy']);
         Route::post('/{event}/publish', [EventController::class, 'publish']);
         Route::post('/{event}/unpublish', [EventController::class, 'unpublish']);
         Route::get('/{event}/statistics', [EventController::class, 'getStatistics']);
