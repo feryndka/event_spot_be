@@ -117,8 +117,10 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
 
     // Subscription Routes
     Route::prefix('subscriptions')->group(function () {
+        Route::get('/promotors', [FollowerController::class, 'index']); // Get followed promotors
         Route::post('/promotors/{promotor}', [FollowerController::class, 'store']); // Follow promotor
         Route::delete('/promotors/{promotor}', [FollowerController::class, 'destroy']); // Unfollow promotor
+        Route::get('/categories', [CategorySubscriptionController::class, 'index']); // Get subscribed categories
         Route::post('/categories/{category}', [CategorySubscriptionController::class, 'store']); // Subscribe to category
         Route::delete('/categories/{category}', [CategorySubscriptionController::class, 'destroy']); // Unsubscribe from category
     });

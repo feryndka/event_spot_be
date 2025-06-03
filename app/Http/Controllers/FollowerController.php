@@ -12,6 +12,23 @@ use Illuminate\Support\Facades\Validator;
 class FollowerController extends Controller
 {
   /**
+   * Display a listing of the followed promotors.
+   */
+  public function index(Request $request)
+  {
+    try {
+      $followedPromotors = Follower::where('user_id', $request->user()->id)->get();
+      return FollowerResource::collection($followedPromotors);
+    } catch (\Exception $e) {
+      Log::error('Error in fetching followed promotors: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to fetch followed promotors'
+      ], 500);
+    }
+  }
+
+  /**
    * Follow a promotor
    */
   public function store(Request $request, User $promotor)

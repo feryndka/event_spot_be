@@ -12,6 +12,23 @@ use Illuminate\Support\Facades\Validator;
 class CategorySubscriptionController extends Controller
 {
   /**
+   * Display a listing of the subscribed categories.
+   */
+  public function index(Request $request)
+  {
+    try {
+      $subscribedCategories = CategorySubscription::where('user_id', $request->user()->id)->get();
+      return CategorySubscriptionResource::collection($subscribedCategories);
+    } catch (\Exception $e) {
+      Log::error('Error in fetching subscribed categories: ' . $e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'message' => 'Failed to fetch subscribed categories'
+      ], 500);
+    }
+  }
+
+  /**
    * Subscribe to a category
    */
   public function store(Request $request, Category $category)
