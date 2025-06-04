@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminEventTagController;
 use App\Http\Controllers\Admin\PromotorVerificationController as AdminVerificationController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -178,6 +179,10 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\PromotorMiddleware::clas
 Route::middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->group(function () {
     // Admin Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
+    Route::get('/dashboard/statistics', [AdminDashboardController::class, 'statistics']);
+    Route::get('/dashboard/statistics/detailed', [AdminDashboardController::class, 'detailedStatistics']);
+    Route::get('/dashboard/statistics/events', [AdminDashboardController::class, 'eventStatistics']);
+    Route::get('/dashboard/statistics/users', [AdminDashboardController::class, 'userStatistics']);
 
     // Admin Mangement Verification for Promotor
     Route::get('/verifications', [AdminVerificationController::class, 'index']);
