@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminEventTagController;
 use App\Http\Controllers\Admin\PromotorVerificationController as AdminVerificationController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\User\UserProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -129,6 +130,14 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\UserMiddleware::class])-
         Route::post('/events/{event}', [PaymentController::class, 'process']); // Process payment
         Route::get('/events/{event}/status', [PaymentController::class, 'checkStatus']); // Check payment status
         Route::post('/events/{event}/refund', [PaymentController::class, 'refund']); // Request refund
+    });
+
+    // User Profile
+    Route::prefix('profile')->group(function () {
+        Route::get('/details', [UserProfileController::class, 'show']); // Get user profile data
+        Route::put('/edit', [UserProfileController::class, 'update']); // Update user profile
+        Route::post('/profile-picture', [UserProfileController::class, 'updateProfilePicture']); // Update profile picture (ubah dari avatar)
+        Route::delete('/profile-picture', [UserProfileController::class, 'deleteProfilePicture']); // Delete profile picture (ubah dari avatar)
     });
 });
 
